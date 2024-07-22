@@ -4,6 +4,7 @@
 
 class Human : public Player {
 public:
+	Human(shared_ptr<ChessBoard> board, int color);
 	void makeNextMove() override;
 };
 

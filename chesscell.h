@@ -7,9 +7,13 @@ class ChessCell : public Displayable {
 private:
 	bool highlighted;
 	std::pair<int, int> chessPos;
-	bool black;
+	int color;
 	
 public:
+	enum Colors {
+		LIGHT = 0, DARK
+	};
+	ChessCell(int color);
 	void display() override;
 	void print() override;
 };

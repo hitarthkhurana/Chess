@@ -13,11 +13,14 @@ class ChessBoard : public Displayable {
 protected:
 	int moveCnt;
 	vector<shared_ptr<Player>> players;
-	vector<unique_ptr<ChessCell>> cells;
-	vector<unique_ptr<ChessPiece>> pieces;
+	vector<vector<unique_ptr<ChessCell>>> cells;
+	vector<vector<shared_ptr<ChessPiece>>> pieces;
 	
 public:
+	ChessBoard();
 	void reset();
+	virtual bool validPos(int row, int col) = 0;
+	shared_ptr<ChessPiece> getPiece(int row, int col);
 };
 
 #endif

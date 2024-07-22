@@ -8,6 +8,7 @@ public:
 	ChessBoard1V1();
 	void display() override;
 	void print() override;
+	bool validPos(int row, int col) override;
 };
 
 #endif
