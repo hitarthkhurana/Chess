@@ -1,7 +1,11 @@
 #ifndef PLAYER_H
 #define PLAYER_H
+#include <memory>
+#include "chessboard.h"
 
 using namespace std;
+
+class ChessBoard;
 
 class Player {
 protected:

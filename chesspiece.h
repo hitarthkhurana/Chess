@@ -8,6 +8,8 @@
 
 using namespace std;
 
+class ChessBoard;
+
 class ChessPiece : public Displayable {
 protected:
 	const char WHITE_CHAR, BLACK_CHAR;

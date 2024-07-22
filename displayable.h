@@ -12,6 +12,7 @@ protected:
 	
 public:
 	Displayable(shared_ptr<Xwindow> window);
+	shared_ptr<Xwindow> getWindow();
 	virtual void display() = 0;
 	virtual void print() = 0;
 };

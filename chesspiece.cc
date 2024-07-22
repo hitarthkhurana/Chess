@@ -4,7 +4,7 @@
 ChessPiece::ChessPiece(shared_ptr<ChessBoard>, int row, int col, int color) :
 	board(board), row(row), col(col), color(color) {}
 
-vector<pair<int, int>> ChessPiece::offsetMoves(vector<pair<int, int>> &offsets) {
+vector<pair<int, int>> ChessPiece::offsetMoves(const vector<pair<int, int>> &offsets) {
 	vector<pair<int, int>> ans;
 	for (auto [a, b] : offsets) {
 		int row2 = row + a, col2 = col + b;
@@ -18,7 +18,7 @@ vector<pair<int, int>> ChessPiece::offsetMoves(vector<pair<int, int>> &offsets) 
 	return ans;
 }
 
-vector<pair<int, int>> ChessPiece::dirMoves(vector<pair<int, int>> &dirs) {
+vector<pair<int, int>> ChessPiece::dirMoves(const vector<pair<int, int>> &dirs) {
 	vector<pair<int, int>> ans;
 	for (auto [a, b] : dirs) {
 		int row2 = row + a, col2 = col + b;

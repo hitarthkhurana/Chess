@@ -3,7 +3,7 @@
 const vector<pair<int, int>> DIRS = {{1, -1}, {-1, 1}, {1, 1}, {-1, -1}};
 
 Bishop::Bishop(shared_ptr<ChessBoard>, int row, int col, int color) :
-	board(board, row, col, color), hasMoved(false) {}
+	ChessPiece(board, row, col, color), hasMoved(false) {}
 
 void Bishop::display() {
 

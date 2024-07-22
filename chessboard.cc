@@ -1,6 +1,7 @@
 #include "chessboard.h"
 
-ChessBoard::ChessBoard() : moveCnt(0) {}
+ChessBoard::ChessBoard(shared_ptr<Xwindow> window) :
+	Displayable(window), moveCnt(0) {}
 
 void ChessBoard::reset() {}
 
