@@ -6,6 +6,7 @@
 #include "computer.h"
 #include "score.h"
 #include "chessboard.h"
+#include "xwindow.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -14,22 +15,22 @@
 using namespace std;
 
 class GameManager {
-    unique_ptr<Displayable> window;
-    unique_ptr<Player> player1;
-    unique_ptr<Player> player2;
-    Score score;
-    ChessBoard board;
-    bool setupMode = false;
+private:
+    shared_ptr<Xwindow> window;
+    //Score score;
+    shared_ptr<ChessBoard> board;
+    bool setupMode, gameActive;
+
 public:
-    GameManager() {}
+    GameManager();
 
     void startGame(const string& whitePlayer, const string& blackPlayer);
     void resign();
     void processMove(const string& moveCommand);
-    void enterSetupMode() {
+    void enterSetupMode();
     void placePiece(const string& piece, const string& position);
     void removePiece(const string& position);
-    void setTurn(const string& color) {
+    void setTurn(const string& color);
     void doneSetup();
     void processCommand(const string& command);
 };

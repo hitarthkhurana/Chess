@@ -1,11 +1,12 @@
 #include "knight.h"
 
-const vector<pair<int, int>> OFFSETS = {{1, 2}, {2, 1}, {-1, 2}, {1, -2}, {2, -1, {-2, 1}, {-2, -1}, {-1, -2}};
+const vector<pair<int, int>> OFFSETS = {{1, 2}, {2, 1}, {-1, 2}, {1, -2}, {2, -1}, {-2, 1}, {-2, -1}, {-1, -2}};
+const char WHITE_CHAR = 'N', BLACK_CHAR = 'n';
 
-King::King(shared_ptr<ChessBoard>, int row, int col, int color) :
-	board(board, row, col, color) {}
+Knight::Knight(shared_ptr<ChessBoard> board, int row, int col, int color) :
+	ChessPiece(board, row, col, color, WHITE_CHAR, BLACK_CHAR) {}
 
-Knight::display() {
+void Knight::display() {
 
 }
 

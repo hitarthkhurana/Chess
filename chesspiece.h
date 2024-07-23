@@ -12,17 +12,18 @@ class ChessBoard;
 
 class ChessPiece : public Displayable {
 protected:
-	const char WHITE_CHAR, BLACK_CHAR;
-	vector<pair<int, int>> offsetMoves(vector<pair<int, int>> &offsets);
-	vector<pair<int, int>> dirMoves(vector<pair<int, int>> &dirs);
-	shared_ptr<ChessBoard> board;
+	vector<pair<int, int>> offsetMoves(const vector<pair<int, int>> &offsets);
+	vector<pair<int, int>> dirMoves(const vector<pair<int, int>> &dirs);
+	weak_ptr<ChessBoard> board;
 	int row, col, color;
+	char white_char, black_char;
 
 public:
-	ChessPiece(shared_ptr<ChessBoard>, int row, int col, int color);
+	ChessPiece(shared_ptr<ChessBoard>, int row, int col, int color, char white_car, char black_char);
 	virtual vector<pair<int, int>> getMoves() = 0;
 	virtual void moveTo(int row, int col);
 	void print() override;
+	int getColor();
 };
 
 #endif

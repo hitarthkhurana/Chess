@@ -12,13 +12,9 @@ class Rook : public ChessPiece {
 private:
 	bool hasMoved;
 
-protected:
-	const char WHITE_CHAR = 'R', BLACK_CHAR = 'r';
-
 public:
 	Rook(shared_ptr<ChessBoard>, int row, int col, int color);
 	void display() override;
-	void print() override;
 	vector<pair<int, int>> getMoves() override;
 	void moveTo(int row, int col) override;
 };

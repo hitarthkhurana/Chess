@@ -6,7 +6,8 @@ using namespace std;
 const char EMPTY_LIGHT = ' ';
 const char EMPTY_DARK = '_';
 
-ChessCell::ChessCell(int color) : color(color) {}
+ChessCell::ChessCell(shared_ptr<ChessBoard> board, int color) :
+	Displayable(board->getWindow()), color(color) {}
 
 void ChessCell::display() {
 

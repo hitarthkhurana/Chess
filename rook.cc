@@ -1,9 +1,10 @@
 #include "rook.h"
 
 const vector<pair<int, int>> DIRS = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
+const char WHITE_CHAR = 'R', BLACK_CHAR = 'r';
 
-Rook::Rook(shared_ptr<ChessBoard>, int row, int col, int color) :
-	board(board, row, col, color), hasMoved(false) {}
+Rook::Rook(shared_ptr<ChessBoard> board, int row, int col, int color) :
+	ChessPiece(board, row, col, color, WHITE_CHAR, BLACK_CHAR), hasMoved(false) {}
 
 void Rook::display() {
 

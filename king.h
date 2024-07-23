@@ -12,13 +12,9 @@ class King : public ChessPiece {
 private:
 	bool hasMoved;
 
-protected:
-	const char WHITE_CHAR = 'K', BLACK_CHAR = 'k';
-
 public:
 	King(shared_ptr<ChessBoard>, int row, int col, int color);
 	void display() override;
-	void print() override;
 	vector<pair<int, int>> getMoves() override;
 	void moveTo(int row, int col) override;
 };

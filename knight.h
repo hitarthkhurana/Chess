@@ -9,13 +9,9 @@
 using namespace std;
 
 class Knight : public ChessPiece {
-protected:
-	const char WHITE_CHAR = 'N', BLACK_CHAR = 'n';
-
 public:
 	Knight(shared_ptr<ChessBoard>, int row, int col, int color);
 	void display() override;
-	void print() override;
 	vector<pair<int, int>> getMoves() override;
 };
 
