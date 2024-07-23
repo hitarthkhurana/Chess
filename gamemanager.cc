@@ -2,8 +2,10 @@
 #include "gamemanager.h"
 #include "chessboard1v1.h"
 
+const int WINDOW_SIZE = 800;
+
 GameManager::GameManager() :
-    window(make_shared<Xwindow>()),
+    window(make_shared<Xwindow>(WINDOW_SIZE, WINDOW_SIZE)),
     board(make_shared<ChessBoard1V1>(window)),
     setupMode(false), gameActive(false) {}
 
@@ -14,6 +16,8 @@ void GameManager::startGame(const string& whitePlayer, const string& blackPlayer
     cout << "Starting game between " << whitePlayer << " and " << blackPlayer << endl;
     board->reset(); // Reset the board for a new game
     setupMode = false;
+	board->print();
+	board->display();
 }
 
 void GameManager::resign() {
@@ -32,11 +36,13 @@ void GameManager::processMove(const string& moveCommand) {
 
     board->move(start, end, promotion);
 
-    cout << "Moved from " << start << " to " << endl;
+    cout << "Moved from " << start << " to " << end;
     if (!promotion.empty()) {
         cout << " and the pawn is promoted to " << promotion;
     }
     cout << endl;
+	board->print();
+	board->display();
 }
 
 void GameManager::enterSetupMode() {
@@ -98,36 +104,28 @@ void GameManager::processCommand(const string& command) {
         string whitePlayer, blackPlayer;
         iss >> whitePlayer >> blackPlayer;
         startGame(whitePlayer, blackPlayer);
-
     } else if (cmd == "resign") {
         resign();
-
     } else if (cmd == "move") {
         string moveCommand;
         getline(iss, moveCommand);
         processMove(moveCommand);
-
     } else if (cmd == "setup") {
         enterSetupMode();
-    
     } else if (cmd == "+") {
         string piece, position;
         iss >> piece >> position;
         placePiece(piece, position);
-    
     } else if (cmd == "-") {
         string position;
         iss >> position;
         removePiece(position);
-
     } else if (cmd == "=") {
         string color;
         iss >> color;
         setTurn(color);
-
     } else if (cmd == "done") {
         doneSetup();
-
     } else {
         cout << "Unknown command." << endl;
     }

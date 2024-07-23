@@ -7,9 +7,35 @@
 #include "knight.h"
 #include "player.h"
 
-shared_ptr<ChessPiece> ChessPiece::fromString(const string &s, shared_ptr<ChessBoard> board) {
-	// temporary measure
-	return shared_ptr<Rook>(board, 0);
+shared_ptr<ChessPiece> ChessPiece::fromString(const string &s, shared_ptr<ChessBoard> board, int row, int col) {
+	switch (s[0]) {
+		case Rook::WHITE_CHAR:
+			return make_shared<Rook>(board, row, col, Player::WHITE);
+		case Rook::BLACK_CHAR:
+			return make_shared<Rook>(board, row, col, Player::BLACK);
+		case King::WHITE_CHAR:
+			return make_shared<King>(board, row, col, Player::WHITE);
+		case King::BLACK_CHAR:
+			return make_shared<King>(board, row, col, Player::BLACK);
+		case Queen::WHITE_CHAR:
+			return make_shared<Queen>(board, row, col, Player::WHITE);
+		case Queen::BLACK_CHAR:
+			return make_shared<Queen>(board, row, col, Player::BLACK);
+		case Bishop::WHITE_CHAR:
+			return make_shared<Bishop>(board, row, col, Player::WHITE);
+		case Bishop::BLACK_CHAR:
+			return make_shared<Bishop>(board, row, col, Player::BLACK);
+		case Pawn::WHITE_CHAR:
+			return make_shared<Pawn>(board, row, col, Player::WHITE);
+		case Pawn::BLACK_CHAR:
+			return make_shared<Pawn>(board, row, col, Player::BLACK);
+		case Knight::WHITE_CHAR:
+			return make_shared<Knight>(board, row, col, Player::WHITE);
+		case Knight::BLACK_CHAR:
+			return make_shared<Knight>(board, row, col, Player::BLACK);
+		default:
+			return shared_ptr<ChessPiece>();
+	}
 }
 
 ChessPiece::ChessPiece(shared_ptr<ChessBoard> board, int row, int col, int color, char white_char, char black_char) :

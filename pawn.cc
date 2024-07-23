@@ -1,8 +1,6 @@
 #include "pawn.h"
 #include "player.h"
 
-const char WHITE_CHAR = 'P', BLACK_CHAR = 'p';
-
 Pawn::Pawn(shared_ptr<ChessBoard> board, int row, int col, int color) :
 	ChessPiece(board, row, col, color, WHITE_CHAR, BLACK_CHAR) {}
 

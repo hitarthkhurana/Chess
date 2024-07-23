@@ -11,13 +11,13 @@ class ChessCell : public Displayable {
 private:
 	bool highlighted;
 	std::pair<int, int> chessPos;
-	int color;
+	int color, x, y, size;
 	
 public:
 	enum Colors {
 		LIGHT = 0, DARK
 	};
-	ChessCell(shared_ptr<ChessBoard> board, int color);
+	ChessCell(shared_ptr<ChessBoard> board, int color, int x, int y, int size);
 	void display() override;
 	void print() override;
 };
