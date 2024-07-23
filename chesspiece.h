@@ -19,9 +19,10 @@ protected:
 	char white_char, black_char;
 
 public:
+	static shared_ptr<ChessPiece> fromString(const string &s, shared_ptr<ChessBoard> board);
 	ChessPiece(shared_ptr<ChessBoard>, int row, int col, int color, char white_car, char black_char);
 	virtual vector<pair<int, int>> getMoves() = 0;
-	virtual void moveTo(int row, int col);
+	virtual void setPos(int row, int col);
 	void print() override;
 	int getColor();
 };

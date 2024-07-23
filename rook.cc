@@ -16,7 +16,7 @@ vector<pair<int, int>> Rook::getMoves() {
 	return ans;
 }
 
-void Rook::moveTo(int row, int col) {
+void Rook::setPos(int row, int col) {
 	hasMoved = true;
-	ChessPiece::moveTo(row, col);
+	ChessPiece::setPos(row, col);
 }

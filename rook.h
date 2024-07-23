@@ -16,7 +16,7 @@ public:
 	Rook(shared_ptr<ChessBoard>, int row, int col, int color);
 	void display() override;
 	vector<pair<int, int>> getMoves() override;
-	void moveTo(int row, int col) override;
+	void setPos(int row, int col) override;
 };
 
 #endif

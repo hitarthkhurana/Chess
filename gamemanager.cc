@@ -8,17 +8,8 @@ GameManager::GameManager() :
     setupMode(false), gameActive(false) {}
 
 void GameManager::startGame(const string& whitePlayer, const string& blackPlayer) {
-    if (whitePlayer == "human") {
-        board->setPlayer(1, make_shared<Human>(board, Player::WHITE));
-    } else if (whitePlayer == "computer") {
-        board->setPlayer(1, make_shared<Computer>(board, Player::WHITE, 1));
-    }
-    
-    if (blackPlayer == "human") {
-        board->setPlayer(2, make_shared<Human>(board, Player::BLACK));
-    } else if (blackPlayer == "computer") {
-        board->setPlayer(2, make_shared<Computer>(board, Player::BLACK, 1));
-    }
+	board->setPlayer(1, Player::fromString(whitePlayer, board, Player::WHITE));
+	board->setPlayer(2, Player::fromString(blackPlayer, board, Player::BLACK));
     
     cout << "Starting game between " << whitePlayer << " and " << blackPlayer << endl;
     board->reset(); // Reset the board for a new game
@@ -38,7 +29,9 @@ void GameManager::processMove(const string& moveCommand) {
     istringstream iss(moveCommand);
     string start, end, promotion;
     iss >> start >> end >> promotion;
-    
+
+    board->move(start, end, promotion);
+
     cout << "Moved from " << start << " to " << endl;
     if (!promotion.empty()) {
         cout << " and the pawn is promoted to " << promotion;

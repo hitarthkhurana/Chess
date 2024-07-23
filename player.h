@@ -13,6 +13,7 @@ protected:
 	shared_ptr<ChessBoard> board;
 
 public:
+	static shared_ptr<Player> fromString(const string &s, shared_ptr<ChessBoard> board, int color);
 	enum Colors {
 		BLACK = 0, WHITE, BLUE, GREEN, YELLOW, RED
 	};

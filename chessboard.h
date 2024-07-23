@@ -27,10 +27,13 @@ public:
 	virtual bool validPos(int row, int col) = 0;
 	shared_ptr<ChessPiece> getPiece(int row, int col);
 	void setPlayer(int index, shared_ptr<Player> player);
+	void placePiece(shared_ptr<ChessPiece> piece, int r, int c);
 	void placePiece(const string &piece, const string &position);
 	void removePiece(const string &position) {}
 	void setTurn(const string &color) {}
 	bool hasValidSetup() {return 0;}
+	void move(int r1, int c1, int r2, int c2);
+	void move(const string &from, const string &to, const string &promotion);
 };
 
 #endif

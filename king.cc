@@ -17,7 +17,7 @@ vector<pair<int, int>> King::getMoves() {
 	return ans;
 }
 
-void King::moveTo(int row, int col) {
+void King::setPos(int row, int col) {
 	hasMoved = true;
-	ChessPiece::moveTo(row, col);
+	ChessPiece::setPos(row, col);
 }

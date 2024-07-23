@@ -6,6 +6,8 @@ using namespace std;
 
 int main() {
 	GameManager gm;
-	cout << "it runsssssssss" << endl;
-	// do something cool
+	string line;
+	while (getline(cin, line)) {
+		gm.processCommand(line);
+	}
 }

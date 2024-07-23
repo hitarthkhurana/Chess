@@ -1,5 +1,16 @@
 #include "chesspiece.h"
+#include "rook.h"
+#include "king.h"
+#include "queen.h"
+#include "bishop.h"
+#include "pawn.h"
+#include "knight.h"
 #include "player.h"
+
+shared_ptr<ChessPiece> ChessPiece::fromString(const string &s, shared_ptr<ChessBoard> board) {
+	// temporary measure
+	return shared_ptr<Rook>(board, 0);
+}
 
 ChessPiece::ChessPiece(shared_ptr<ChessBoard> board, int row, int col, int color, char white_char, char black_char) :
 	Displayable(board->getWindow()), board(board), row(row), col(col),
@@ -40,7 +51,7 @@ vector<pair<int, int>> ChessPiece::dirMoves(const vector<pair<int, int>> &dirs) 
 	return ans;
 }
 
-void ChessPiece::moveTo(int row, int col) {
+void ChessPiece::setPos(int row, int col) {
 	this->row = row;
 	this->col = col;
 }
