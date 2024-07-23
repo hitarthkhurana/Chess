@@ -9,6 +9,6 @@ void Bishop::display() {
 
 }
 
-vector<pair<int, int>> Bishop::getMoves() {
+vector<vector<int>> Bishop::getMoves() {
 	return dirMoves(DIRS);
 }

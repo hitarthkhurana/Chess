@@ -9,6 +9,6 @@ void Queen::display() {
 
 }
 
-vector<pair<int, int>> Queen::getMoves() {
+vector<vector<int>> Queen::getMoves() {
 	return dirMoves(DIRS);
 }

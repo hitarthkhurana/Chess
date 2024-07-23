@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cctype>
 #include "gamemanager.h"
 #include "chessboard1v1.h"
 
@@ -13,17 +14,21 @@ void GameManager::startGame(const string& whitePlayer, const string& blackPlayer
 	board->setPlayer(1, Player::fromString(whitePlayer, board, Player::WHITE));
 	board->setPlayer(2, Player::fromString(blackPlayer, board, Player::BLACK));
     
-    cout << "Starting game between " << whitePlayer << " and " << blackPlayer << endl;
-    board->reset(); // Reset the board for a new game
-    setupMode = false;
+    cout << "Starting game between " << whitePlayer << " and " << blackPlayer << "." << endl;
+	gameActive = true;
 	board->print();
 	board->display();
 }
 
 void GameManager::resign() {
     if (gameActive) {
-        setupMode = false;
-        //cout << (player1->isBlack() ? "White wins!" : "Black wins!") << endl;
+		if (board->getCurrentPlayer()->getColor() == Player::BLACK) {
+			cout << "White wins!" << endl;
+		} else {
+			cout << "Black wins!" << endl;
+		}
+		gameActive = false;
+		board->reset();
     } else {
         cout << "No game in progress to resign from." << endl;
     }
@@ -34,15 +39,19 @@ void GameManager::processMove(const string& moveCommand) {
     string start, end, promotion;
     iss >> start >> end >> promotion;
 
-    board->move(start, end, promotion);
+    bool valid = board->move(start, end, promotion);
 
-    cout << "Moved from " << start << " to " << end;
-    if (!promotion.empty()) {
-        cout << " and the pawn is promoted to " << promotion;
-    }
-    cout << endl;
-	board->print();
-	board->display();
+	if (valid) {
+		cout << "Moved from " << start << " to " << end;
+		if (!promotion.empty()) {
+			cout << " and the pawn is promoted to " << promotion;
+		}
+		cout << "." << endl;
+		board->print();
+		board->display();
+	} else {
+		cout << "Invalid move." << endl;
+	}
 }
 
 void GameManager::enterSetupMode() {
@@ -57,27 +66,35 @@ void GameManager::enterSetupMode() {
 void GameManager::placePiece(const string& piece, const string& position) {
     if (setupMode) {
         board->placePiece(piece, position);
+		board->print();
+		board->display();
         cout << "Placed " << piece << " at " << position << "." << endl;
     } else {
-        cout << "Not in setup mode." << endl;
+        cout << "Not currently in setup mode." << endl;
     }
 }
 
 void GameManager::removePiece(const string& position) {
     if (setupMode) {
         board->removePiece(position);
+		board->print();
+		board->display();
         cout << "Removed piece from " << position << "." << endl;
     } else {
-        cout << "Not in setup mode." << endl;
+        cout << "Not currently in setup mode." << endl;
     }
 }
 
 void GameManager::setTurn(const string& color) {
     if (setupMode) {
-        board->setTurn(color); // Implement this method in ChessBoard
-        cout << color << "'s turn next." << endl;
+        bool success = board->setTurn(color);
+		if (!success) {
+			cout << "Invalid color." << endl;
+		} else {
+			cout << color << " will go first." << endl;
+		}
     } else {
-        cout << "Not in setup mode." << endl;
+        cout << "Not currently in setup mode." << endl;
     }
 }
 
@@ -88,17 +105,38 @@ void GameManager::doneSetup() {
             setupMode = false;
             cout << "Setup complete." << endl;
         } else {
-            cout << "Invalid setup. Make sure there is exactly one white and one black king, no pawns on the first/last row, and no king is in check." << endl;
+            cout << "Invalid setup." << endl;
+			cout << "Make sure there is exactly one white and one black king." << endl;
+			cout << "Make sure no pawns are on the first/last row, and no king is in check." << endl;
         }
     } else {
-        cout << "Not in setup mode." << endl;
+        cout << "Not currently in setup mode." << endl;
     }
+}
+
+void GameManager::undoMove() {
+	if (!gameActive) {
+		cout << "No game in progress." << endl;
+	} else {
+		bool success = board->undo();
+		if (success) {
+			cout << "Undid last move." << endl;
+			board->print();
+			board->display();
+		} else {
+			cout << "No moves to undo." << endl;
+		}
+	}
 }
 
 void GameManager::processCommand(const string& command) {
     istringstream iss(command);
     string cmd;
     iss >> cmd;
+
+	for (char &c : cmd) {
+		c = tolower(c);
+	}
 
     if (cmd == "game") {
         string whitePlayer, blackPlayer;
@@ -126,6 +164,11 @@ void GameManager::processCommand(const string& command) {
         setTurn(color);
     } else if (cmd == "done") {
         doneSetup();
+	} else if (cmd == "undo") {
+		undoMove();
+	} else if (cmd == "exit" || cmd == "quit") {
+		cout << "Bye!" << endl;
+		exit(0);
     } else {
         cout << "Unknown command." << endl;
     }

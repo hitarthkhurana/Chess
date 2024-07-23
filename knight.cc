@@ -9,6 +9,6 @@ void Knight::display() {
 
 }
 
-vector<pair<int, int>> Knight::getMoves() {
+vector<vector<int>> Knight::getMoves() {
 	return offsetMoves(OFFSETS);
 }

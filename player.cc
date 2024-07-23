@@ -14,3 +14,15 @@ shared_ptr<Player> Player::fromString(const string &s, shared_ptr<ChessBoard> bo
 
 Player::Player(shared_ptr<ChessBoard> board, int color) :
 	color(color), wins(0), board(board) {}
+
+bool Player::getColor() {
+	return color;
+}
+
+int Player::getWins() {
+	return wins;
+}
+
+void Player::incrementWins() {
+	wins++;
+}

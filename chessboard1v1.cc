@@ -34,6 +34,10 @@ void ChessBoard1V1::init() {
 				
 		}
 	}
+	reset();
+}
+
+void ChessBoard1V1::reset() {
 	for (int i = 0; i < SIZE; i++) {
 		for (int j = 0; j < SIZE; j++) {
 			pieces[i][j] = ChessPiece::fromString(
@@ -79,5 +83,5 @@ void ChessBoard1V1::print() {
 
 bool ChessBoard1V1::validPos(int row, int col) {
 	init();
-	return 1 <= row && row <= SIZE && 1 <= col && col <= SIZE;
+	return 0 <= row && row < SIZE && 0 <= col && col < SIZE;
 }

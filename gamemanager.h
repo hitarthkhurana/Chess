@@ -32,6 +32,7 @@ public:
     void removePiece(const string& position);
     void setTurn(const string& color);
     void doneSetup();
+	void undoMove();
     void processCommand(const string& command);
 };
 

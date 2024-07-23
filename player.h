@@ -20,6 +20,9 @@ public:
 
 	Player(shared_ptr<ChessBoard> board, int color);
 	virtual void makeNextMove() = 0;
+	bool getColor();
+	int getWins();
+	void incrementWins();
 };
 
 #endif
