@@ -6,6 +6,6 @@ using namespace std;
 
 int main() {
 	GameManager gm;
-	cout << "it compilessssssssss" << endl;
+	cout << "it runsssssssss" << endl;
 	// do something cool
 }

@@ -6,8 +6,11 @@
 #include "player.h"
 
 class ChessBoard1V1 : public ChessBoard {
+private:
+	bool hasInit;
 public:
 	ChessBoard1V1(shared_ptr<Xwindow> window);
+	void init(); // cannot run "shared_from_this()" in constructor
 	void display() override;
 	void print() override;
 	bool validPos(int row, int col) override;

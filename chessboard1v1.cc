@@ -6,10 +6,13 @@ const int SIZE = 8;
 const int PLAYER_CNT = 2;
 
 ChessBoard1V1::ChessBoard1V1(shared_ptr<Xwindow> window) :
-	ChessBoard(window, PLAYER_CNT, SIZE) {
+	ChessBoard(window, PLAYER_CNT, SIZE), hasInit(false) {}
 
-	// initialize players
-	
+void ChessBoard1V1::init() {
+	if (hasInit) {
+		return;
+	}
+	hasInit = true;
 	for (int i = 0; i < SIZE; i++) {
 		for (int j = 0; j < SIZE; j++) {
 			cells[i][j] = make_unique<ChessCell>(shared_from_this(), (i + j) % 2);
@@ -19,6 +22,7 @@ ChessBoard1V1::ChessBoard1V1(shared_ptr<Xwindow> window) :
 }
 
 void ChessBoard1V1::display() {
+	init();
 	for (int i = 0; i < SIZE; i++) {
 		for (int j = 0; j < SIZE; j++) {
 			cells[i][j]->display();
@@ -30,6 +34,7 @@ void ChessBoard1V1::display() {
 }
 
 void ChessBoard1V1::print() {
+	init();
 	for (int i = 0; i < SIZE; i++) {
 		for (int j = 0; j < SIZE; j++) {
 			if (pieces[i][j]) {
@@ -42,5 +47,6 @@ void ChessBoard1V1::print() {
 }
 
 bool ChessBoard1V1::validPos(int row, int col) {
+	init();
 	return 1 <= row && row <= SIZE && 1 <= col && col <= SIZE;
 }
