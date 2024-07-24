@@ -10,13 +10,13 @@ using namespace std;
 
 class Rook : public ChessPiece {
 private:
-	bool moved;
+	bool moveCnt;
 
 public:
 	static const char WHITE_CHAR = 'R', BLACK_CHAR = 'r';
 	Rook(shared_ptr<ChessBoard>, int row, int col, int color);
 	vector<vector<int>> getMoves() override;
-	void setPos(int row, int col) override;
+	void setPos(int row, int col, bool undo = false) override;
 	bool hasMoved();
 };
 

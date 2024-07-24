@@ -18,4 +18,7 @@ int main() {
 		gm.processCommand(line);
 		cout << endl << PROMPT;
 	}
+
+	cout << endl << endl;
+	gm.displayScore();
 }

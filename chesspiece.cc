@@ -83,7 +83,7 @@ vector<vector<int>> ChessPiece::dirMoves(const vector<pair<int, int>> &dirs) {
 	return ans;
 }
 
-void ChessPiece::setPos(int row, int col) {
+void ChessPiece::setPos(int row, int col, bool undo) {
 	this->row = row;
 	this->col = col;
 }

@@ -1,37 +1,10 @@
 #include "chessboard.h"
+#include "chessboard1v1.h"
 #include "computer.h"
-
-const int MOVE_SIZE = 4;
 
 void ChessBoard::setPiece(int row, int col, shared_ptr<ChessPiece> piece) {
 	pieces[row][col] = piece;
 	updated[row][col] = true;
-}
-
-void ChessBoard::makeComputerMoves() {
-	int sz = players.size();
-	while (true) {
-		shared_ptr<Player> cur_player = players[moveCnt % sz];
-		shared_ptr<Computer> computer = dynamic_pointer_cast<Computer>(cur_player);
-		if (computer) {
-			auto move = computer->getNextMove();
-			processMove(move);
-			moveCnt++;
-		} else {
-			break;
-		}
-	}
-}
-
-void ChessBoard::processMove(const vector<int> &move) {
-	int sz = move.size();
-	for (int i = 0; i < sz; i += MOVE_SIZE) {
-		int a = move[i], b = move[i + 1], c = move[i + 2], d = move[i + 3];
-		removed_pieces.push(pieces[c][d]);
-		setPiece(c, d, pieces[a][b]);
-		pieces[c][d]->setPos(c, d);
-		setPiece(a, b, shared_ptr<ChessPiece>());
-	}
 }
 
 ChessBoard::ChessBoard(shared_ptr<Xwindow> window, int player_cnt, int size) :
@@ -53,6 +26,10 @@ shared_ptr<ChessPiece> ChessBoard::getPiece(int row, int col) {
 
 void ChessBoard::setPlayer(int index, shared_ptr<Player> player) {
 	players[index - 1] = player;
+}
+
+shared_ptr<Player> ChessBoard::getPlayer(int index) {
+	return players[index - 1];
 }
 
 void ChessBoard::placePiece(const string &piece, const string &pos) {
@@ -111,10 +88,21 @@ bool ChessBoard::move(const string &from, const string &to, const string &promot
 	if (index == -1) {
 		return false;
 	}
-	moveCnt++;
-	all_moves.push(moves[index]);
 	processMove(moves[index]);
-	makeComputerMoves();
+	// If in check, the check must be removed.
+	if (status == ChessBoard1V1::CHECK) {
+		moveCnt--;
+		updateStatus();
+		if (status == ChessBoard1V1::CHECK || status == ChessBoard1V1::CHECKMATE) {
+			moveCnt++;
+			undo();
+			updateStatus();
+			return false;
+		} else {
+			moveCnt++;
+		}
+	}
+	updateStatus();
 	return true;
 }
 
@@ -131,11 +119,46 @@ bool ChessBoard::undo() {
 	for (int i = sz - MOVE_SIZE; i >= 0; i -= MOVE_SIZE) {
 		int a = move[i], b = move[i + 1], c = move[i + 2], d = move[i + 3];
 		setPiece(a, b, pieces[c][d]);
+		pieces[a][b]->setPos(c, d, true);
 		setPiece(c, d, removed_pieces.top());
 		removed_pieces.pop();
 	}
 	all_moves.pop();
+	updateStatus();
+	moveCnt--;
 	return true;
+}
+
+void ChessBoard::processMove(const vector<int> &move) {
+	int sz = move.size();
+	for (int i = 0; i < sz; i += MOVE_SIZE) {
+		int a = move[i], b = move[i + 1], c = move[i + 2], d = move[i + 3];
+		removed_pieces.push(pieces[c][d]);
+		setPiece(c, d, pieces[a][b]);
+		pieces[c][d]->setPos(c, d);
+		setPiece(a, b, shared_ptr<ChessPiece>());
+	}
+	all_moves.push(move);
+	moveCnt++;
+}
+
+void ChessBoard::makeComputerMove() {
+	int sz = players.size();
+	shared_ptr<Player> cur_player = players[moveCnt % sz];
+	shared_ptr<Computer> computer = dynamic_pointer_cast<Computer>(cur_player);
+	if (computer) {
+		auto move = computer->getNextMove();
+		processMove(move);
+		updateStatus();
+	}
+}
+
+vector<int> ChessBoard::getLastMove() {
+	return all_moves.top();
+}
+
+int ChessBoard::getStatus() {
+	return status;
 }
 
 ChessBoard::Iterator::Iterator(shared_ptr<ChessBoard> board, int i, int j) :

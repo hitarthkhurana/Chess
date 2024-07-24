@@ -2,8 +2,10 @@
 #include <cctype>
 #include "gamemanager.h"
 #include "chessboard1v1.h"
+#include "computer.h"
 
 const int WINDOW_SIZE = 720;
+const int WHITE_TURN = 1, BLACK_TURN = 2;
 
 GameManager::GameManager() :
     window(make_shared<Xwindow>(WINDOW_SIZE, WINDOW_SIZE)),
@@ -17,13 +19,14 @@ void GameManager::startGame(const string& whitePlayer, const string& blackPlayer
 	if (gameActive) {
 		cout << "A game is already in progress." << endl;
 	} else {
-		board->setPlayer(1, Player::fromString(whitePlayer, board, Player::WHITE));
-		board->setPlayer(2, Player::fromString(blackPlayer, board, Player::BLACK));
+		board->setPlayer(WHITE_TURN, Player::fromString(whitePlayer, board, Player::WHITE));
+		board->setPlayer(BLACK_TURN, Player::fromString(blackPlayer, board, Player::BLACK));
 		
 		cout << "Starting game between " << whitePlayer << " and " << blackPlayer << "." << endl;
 		gameActive = true;
 		board->print();
 		board->display();
+		makeComputerMoves();
 	}
 }
 
@@ -31,14 +34,66 @@ void GameManager::resign() {
     if (gameActive) {
 		if (board->getCurrentPlayer()->getColor() == Player::BLACK) {
 			cout << "White wins!" << endl;
+			board->getPlayer(WHITE_TURN)->incrementWins();
 		} else {
 			cout << "Black wins!" << endl;
+			board->getPlayer(BLACK_TURN)->incrementWins();
 		}
 		gameActive = false;
 		board->reset();
     } else {
         cout << "No game in progress to resign from." << endl;
     }
+}
+
+void GameManager::checkBoardStatus() {
+	int status = board->getStatus();
+	if (status == ChessBoard1V1::CHECK) {
+		if (board->getCurrentPlayer()->getColor() == Player::WHITE) {
+			cout << "White is in check." << endl;
+		} else {
+			cout << "Black is in check." << endl;
+		}
+	} else if (status == ChessBoard1V1::CHECKMATE) {
+		cout << "Checkmate! ";
+		resign();
+	} else if (status == ChessBoard1V1::STALEMATE) {
+		cout << "Stalemate!" << endl;
+		gameActive = false;
+		board->reset();
+	}
+}
+
+void GameManager::printLastMove() { 
+	auto move = board->getLastMove();
+	int sz = move.size();
+	cout << "Moved ";
+	for (int i = 0; i < sz; i += MOVE_SIZE) {
+		if (i != 0) {
+			cout << " and ";
+		}
+		cout << "from ";
+		cout << static_cast<char>(move[i + 1] + 'a') << (move[i + 0] + 1);
+		cout << " to ";
+		cout << static_cast<char>(move[i + 3] + 'a') << (move[i + 2] + 1);
+	}
+	// board->...promotion...();
+	cout << "." << endl;
+}
+
+void GameManager::makeComputerMoves() {
+	while (true) {
+		auto computer = dynamic_pointer_cast<Computer>(board->getCurrentPlayer());
+		if (!computer) {
+			break;
+		}
+		board->makeComputerMove();
+		board->display();
+		board->print();
+		cout << endl;
+		printLastMove();
+		checkBoardStatus();
+	}
 }
 
 void GameManager::processMove(const string& moveCommand) {
@@ -50,13 +105,11 @@ void GameManager::processMove(const string& moveCommand) {
 		bool valid = board->move(start, end, promotion);
 
 		if (valid) {
-			cout << "Moved from " << start << " to " << end;
-			if (!promotion.empty()) {
-				cout << " and the pawn is promoted to " << promotion;
-			}
-			cout << "." << endl;
 			board->print();
 			board->display();
+			printLastMove();
+			checkBoardStatus();
+			makeComputerMoves();
 		} else {
 			cout << "Invalid move." << endl;
 		}
@@ -140,6 +193,12 @@ void GameManager::undoMove() {
 	}
 }
 
+void GameManager::displayScore() {
+	cout << "Final score:" << endl;
+	cout << "White: " << board->getPlayer(WHITE_TURN)->getWins() << endl;
+	cout << "Black: " << board->getPlayer(BLACK_TURN)->getWins() << endl;
+}
+
 void GameManager::processCommand(const string& command) {
     istringstream iss(command);
     string cmd;
@@ -149,7 +208,9 @@ void GameManager::processCommand(const string& command) {
 		c = tolower(c);
 	}
 
-    if (cmd == "game") {
+	if (cmd.empty()) {
+		return;
+	} else if (cmd == "game") {
         string whitePlayer, blackPlayer;
         iss >> whitePlayer >> blackPlayer;
         startGame(whitePlayer, blackPlayer);

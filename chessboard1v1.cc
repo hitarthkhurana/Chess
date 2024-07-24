@@ -1,6 +1,6 @@
 #include "chesscell.h"
 #include "chessboard1v1.h"
-#include "rook.h"
+#include "king.h"
 
 const int SIZE = 8;
 const int PLAYER_CNT = 2;
@@ -15,6 +15,44 @@ const vector<string> PLACEMENTS = {
 	"PPPPPPPP",
 	"RNBKQBNR"
 };
+
+void ChessBoard1V1::updateStatus() {
+	vector<vector<int>> cur_moves, next_moves;
+	int color = getCurrentPlayer()->getColor();
+	for (auto piece : *this) {
+		auto new_moves = piece->getMoves();
+		auto &moves = piece->getColor() == color ? cur_moves : next_moves;
+		moves.insert(moves.end(), new_moves.begin(), new_moves.end());
+	}
+	bool check = false;
+	shared_ptr<King> king;
+	for (auto &move : next_moves) {
+		int sz = move.size();
+		for (int i = 0; i < sz; i += MOVE_SIZE) {
+			int a = move[i + 2], b = move[i + 3];
+			king = dynamic_pointer_cast<King>(pieces[a][b]);
+			if (king) {
+				check = true;
+				break;
+			}
+		}
+		if (check) {
+			break;
+		}
+	}
+	if (check) {
+		auto king_moves = king->getMoves();
+		if (king_moves.empty()) {
+			status = CHECKMATE; 
+		} else {
+			status = CHECK;
+		}
+	} else if (cur_moves.empty()) {
+		status = STALEMATE;
+	} else {
+		status = NORMAL;
+	}
+}
 
 ChessBoard1V1::ChessBoard1V1(shared_ptr<Xwindow> window) :
 	ChessBoard(window, PLAYER_CNT, SIZE), hasInit(false) {}

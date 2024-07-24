@@ -11,13 +11,15 @@
 
 using namespace std;
 
+const int MOVE_SIZE = 4;
+
 class ChessPiece;
 class ChessCell;
 class Player;
 
 class ChessBoard : public Displayable, public enable_shared_from_this<ChessBoard> {
 protected:
-	int moveCnt;
+	int moveCnt, status;
 	vector<shared_ptr<Player>> players;
 	vector<vector<unique_ptr<ChessCell>>> cells;
 	vector<vector<shared_ptr<ChessPiece>>> pieces;
@@ -25,8 +27,7 @@ protected:
 	stack<vector<int>> all_moves;
 	stack<shared_ptr<ChessPiece>> removed_pieces;
 	void setPiece(int row, int col, shared_ptr<ChessPiece> piece);
-	void makeComputerMoves();
-	void processMove(const vector<int> &move);
+	virtual void updateStatus() = 0;
 	
 public:
 	ChessBoard(shared_ptr<Xwindow> window, int player_cnt, int size);
@@ -34,6 +35,7 @@ public:
 	virtual bool validPos(int row, int col) = 0;
 	shared_ptr<ChessPiece> getPiece(int row, int col);
 	void setPlayer(int index, shared_ptr<Player> player);
+	shared_ptr<Player> getPlayer(int index);
 	void placePiece(const string &piece, const string &pos);
 	void removePiece(const string &pos);
 	bool setTurn(const string &color);
@@ -42,6 +44,10 @@ public:
 	shared_ptr<Player> getCurrentPlayer();
 	bool undo();
 	virtual pair<int, int> getCoords(int row, int col) = 0;
+	void processMove(const vector<int> &move);
+	void makeComputerMove();
+	vector<int> getLastMove();
+	int getStatus();
 
 	class Iterator {
 	private:

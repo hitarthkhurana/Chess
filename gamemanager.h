@@ -17,7 +17,6 @@ using namespace std;
 class GameManager {
 private:
     shared_ptr<Xwindow> window;
-    //Score score;
     shared_ptr<ChessBoard> board;
     bool setupMode, gameActive;
 
@@ -26,13 +25,17 @@ public:
 
     void startGame(const string& whitePlayer, const string& blackPlayer);
     void resign();
+    void checkBoardStatus();
     void processMove(const string& moveCommand);
+    void printLastMove();
+    void makeComputerMoves();
     void enterSetupMode();
     void placePiece(const string& piece, const string& position);
     void removePiece(const string& position);
     void setTurn(const string& color);
     void doneSetup();
 	void undoMove();
+	void displayScore();
     void processCommand(const string& command);
 };
 

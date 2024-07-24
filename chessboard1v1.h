@@ -8,6 +8,10 @@
 class ChessBoard1V1 : public ChessBoard {
 private:
 	bool hasInit;
+
+protected:
+	void updateStatus() override;
+
 public:
 	ChessBoard1V1(shared_ptr<Xwindow> window);
 	void init(); // cannot run "shared_from_this()" in constructor
@@ -16,6 +20,10 @@ public:
 	void print() override;
 	bool validPos(int row, int col) override;
 	pair<int, int> getCoords(int row, int col) override;
+
+	enum PlayStatus {
+		NORMAL = 0, CHECK, CHECKMATE, STALEMATE
+	};
 };
 
 #endif

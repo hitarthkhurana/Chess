@@ -22,7 +22,7 @@ public:
 	static shared_ptr<ChessPiece> fromString(const string &s, shared_ptr<ChessBoard> board, int row, int col);
 	ChessPiece(shared_ptr<ChessBoard> board, int row, int col, int color, char white_char, char black_char);
 	virtual vector<vector<int>> getMoves() = 0;
-	virtual void setPos(int row, int col);
+	virtual void setPos(int row, int col, bool undo = false);
 	void print() override;
 	void display() override;
 	int getColor();

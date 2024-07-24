@@ -1,16 +1,18 @@
+#include <set>
 #include "king.h"
 #include "rook.h"
+#include "chessboard1v1.h"
 
 const vector<pair<int, int>> OFFSETS = {{0, 1}, {1, 0}, {-1, 0}, {0, -1}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
 const vector<pair<int, int>> CASTLE_DIRS = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
 
 King::King(shared_ptr<ChessBoard> board, int row, int col, int color) :
-	ChessPiece(board, row, col, color, WHITE_CHAR, BLACK_CHAR), moved(false) {}
+	ChessPiece(board, row, col, color, WHITE_CHAR, BLACK_CHAR), moveCnt(0) {}
 
 vector<vector<int>> King::getMoves() {
 	vector<vector<int>> ans = ChessPiece::offsetMoves(OFFSETS);
 	auto real_board = board.lock();
-	if (!moved) {
+	if (moveCnt == 0) {
 		for (auto [a, b] : CASTLE_DIRS) {
 			int row2 = row + a, col2 = col + b;
 			while (real_board->validPos(row2, col2)) {
@@ -30,14 +32,37 @@ vector<vector<int>> King::getMoves() {
 			}
 		}
 	}
-	return ans;
+	vector<vector<int>> adjusted_ans;
+	set<pair<int, int>> bad_targets;
+	for (auto piece : *real_board) {
+		if (piece->getColor() == color) {
+			continue;
+		}
+		auto king = dynamic_pointer_cast<King>(piece);
+		if (king) {
+			continue;
+		}
+		for (auto move : piece->getMoves()) {
+			int sz = move.size();
+			for (int i = 0; i < sz; i += MOVE_SIZE) {
+				bad_targets.insert({move[i + 2], move[i + 3]});
+			}
+		}
+	}
+	// consts?
+	for (auto move : ans) {
+		if (!bad_targets.count({move[2], move[3]})) {
+			adjusted_ans.push_back(move);
+		}
+	}
+	return adjusted_ans;
 }
 
-void King::setPos(int row, int col) {
-	moved = true;
+void King::setPos(int row, int col, bool undo) {
 	ChessPiece::setPos(row, col);
+	moveCnt += undo ? -1 : 1;
 }
 
 bool King::hasMoved() {
-	return moved;
+	return moveCnt != 0;
 }

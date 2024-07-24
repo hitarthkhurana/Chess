@@ -6,12 +6,12 @@ const vector<pair<int, int>> CASTLE_DIRS = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
 const int CASTLE_SIZE = 8, CASTLE_IND1 = 4, CASTLE_IND2 = 5;
 
 Rook::Rook(shared_ptr<ChessBoard> board, int row, int col, int color) :
-	ChessPiece(board, row, col, color, WHITE_CHAR, BLACK_CHAR), moved(false) {}
+	ChessPiece(board, row, col, color, WHITE_CHAR, BLACK_CHAR), moveCnt(0) {}
 
 vector<vector<int>> Rook::getMoves() {
 	vector<vector<int>> ans = dirMoves(DIRS);
 	auto real_board = board.lock();
-	if (!moved) {
+	if (moveCnt == 0) {
 		for (auto [a, b] : CASTLE_DIRS) {
 			int row2 = row + a, col2 = col + b;
 			while (real_board->validPos(row2, col2)) {
@@ -36,11 +36,11 @@ vector<vector<int>> Rook::getMoves() {
 	return ans;
 }
 
-void Rook::setPos(int row, int col) {
-	moved = true;
+void Rook::setPos(int row, int col, bool undo) {
 	ChessPiece::setPos(row, col);
+	moveCnt += undo ? -1 : 1;
 }
 
 bool Rook::hasMoved() {
-	return moved;
+	return moveCnt != 0;
 }
