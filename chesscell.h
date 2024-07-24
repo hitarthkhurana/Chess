@@ -9,15 +9,16 @@ class ChessBoard;
 
 class ChessCell : public Displayable {
 private:
+	weak_ptr<ChessBoard> board;
 	bool highlighted;
 	std::pair<int, int> chessPos;
-	int color, x, y, size;
+	int row, col, color, size;
 	
 public:
 	enum Colors {
 		LIGHT = 0, DARK
 	};
-	ChessCell(shared_ptr<ChessBoard> board, int color, int x, int y, int size);
+	ChessCell(shared_ptr<ChessBoard> board, int row, int col, int color, int size);
 	void display() override;
 	void print() override;
 };

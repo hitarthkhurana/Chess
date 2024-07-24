@@ -3,12 +3,15 @@
 #include "gamemanager.h"
 #include "chessboard1v1.h"
 
-const int WINDOW_SIZE = 800;
+const int WINDOW_SIZE = 720;
 
 GameManager::GameManager() :
     window(make_shared<Xwindow>(WINDOW_SIZE, WINDOW_SIZE)),
     board(make_shared<ChessBoard1V1>(window)),
-    setupMode(false), gameActive(false) {}
+    setupMode(false), gameActive(false) {
+	
+	board->display();
+}
 
 void GameManager::startGame(const string& whitePlayer, const string& blackPlayer) {
 	board->setPlayer(1, Player::fromString(whitePlayer, board, Player::WHITE));

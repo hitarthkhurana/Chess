@@ -7,12 +7,13 @@ using namespace std;
 const char EMPTY_LIGHT = ' ';
 const char EMPTY_DARK = '_';
 
-ChessCell::ChessCell(shared_ptr<ChessBoard> board, int color, int x, int y, int size) :
-	Displayable(board->getWindow()), color(color), x(x), y(y), size(size) {}
+ChessCell::ChessCell(shared_ptr<ChessBoard> board, int row, int col, int color, int size) :
+	Displayable(board->getWindow()), board(board), row(row), col(col), color(color), size(size) {}
 
 void ChessCell::display() {
+	auto [x, y] = board.lock()->getCoords(row, col);
 	window->fillRectangle(x, y, size, size,
-		color == LIGHT ? Xwindow::White : Xwindow::Black);
+		color == LIGHT ? Xwindow::LIGHT_GREEN : Xwindow::DARK_GREEN);
 }
 
 void ChessCell::print() {

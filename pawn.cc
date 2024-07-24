@@ -4,10 +4,6 @@
 Pawn::Pawn(shared_ptr<ChessBoard> board, int row, int col, int color) :
 	ChessPiece(board, row, col, color, WHITE_CHAR, BLACK_CHAR) {}
 
-void Pawn::display() {
-
-}
-
 vector<vector<int>> Pawn::getMoves() {
 	// wrong logic currently
 	int row2 = row, col2 = col;

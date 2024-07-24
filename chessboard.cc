@@ -22,48 +22,40 @@ void ChessBoard::setPlayer(int index, shared_ptr<Player> player) {
 	players[index - 1] = player;
 }
 
-void ChessBoard::placePiece(shared_ptr<ChessPiece> piece, int row, int col) {
-	piece->setPos(row, col);
-	pieces[row][col] = piece;
-}
-
 void ChessBoard::placePiece(const string &piece, const string &pos) {
-	placePiece(ChessPiece::fromString(piece, shared_from_this()), pos[1] - '1', pos[0] - 'a');
-}
-
-void ChessBoard::removePiece(int row, int col) {
-	pieces[row][col] = shared_ptr<ChessPiece>();
+	int row = pos[1] - '1', col = pos[0] - 'a';
+	pieces[row][col] = ChessPiece::fromString(piece, shared_from_this(), row, col);
 }
 
 void ChessBoard::removePiece(const string &pos) {
-	removePiece(pos[1] - '1', pos[0] - 'a');
-}
-
-void ChessBoard::setTurn(int color) {
-	int sz = players.size();
-	for (int i = 0; i < sz; i++) {
-		auto &player = players[i];
-		if (player->getColor() == color) {
-			moveCnt = i;
-			break;
-		}
-	}
+	pieces[pos[1] - '1'][pos[0] - 'a'] = shared_ptr<ChessPiece>();
 }
 
 bool ChessBoard::setTurn(const string &color) {
-	if (color == "white") {
-		setTurn(Player::WHITE);
+	int color_num;
+	if (color == "white") { // make const?
+		color_num = Player::WHITE;
 	} else if (color == "black") {
-		setTurn(Player::BLACK);
+		color_num = Player::BLACK;
 	} else {
 		return false;
+	}
+	int sz = players.size();
+	for (int i = 0; i < sz; i++) {
+		auto &player = players[i];
+		if (player->getColor() == color_num) {
+			moveCnt = i;
+			break;
+		}
 	}
 	return true;
 }
 
 bool ChessBoard::hasValidSetup() {return 1;}
 
-bool ChessBoard::move(int r1, int c1, int r2, int c2) {
+bool ChessBoard::move(const string &from, const string &to, const string &promotion) {
+	// need to account for promotion
+	int r1 = from[1] - '1', c1 = from[0] - 'a', r2 = to[1] - '1', c2 = to[0] - 'a';
 	if (!validPos(r1, c1) || !validPos(r2, c2) || !pieces[r1][c1]) {
 		return false;
 	}
@@ -97,10 +89,6 @@ bool ChessBoard::move(int r1, int c1, int r2, int c2) {
 	moveCnt++;
 	all_moves.push(moves[index]);
 	return true;
-}
-
-bool ChessBoard::move(const string &from, const string &to, const string &promotion) {
-	return move(from[1] - '1', from[0] - 'a', to[1] - '1', to[0] - 'a');
 }
 
 shared_ptr<Player> ChessBoard::getCurrentPlayer() {

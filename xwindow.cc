@@ -5,6 +5,7 @@
 #include <string>
 #include <unistd.h>
 #include "xwindow.h"
+#include "image.h"
 
 using namespace std;
 
@@ -31,16 +32,16 @@ Xwindow::Xwindow(int width, int height) : width{width}, height{height} {
   // Set up colours.
   XColor xcolour;
   Colormap cmap;
-  char color_vals[5][10]={"white", "black", "red", "green", "blue"};
+  char color_vals[7][20]={"white", "black", "red", "green", "blue", "rgb:ef/ef/d2", "rgb:77/97/56"};
 
   cmap=DefaultColormap(d,DefaultScreen(d));
-  for(int i=0; i < 5; ++i) {
+  for(int i=0; i < 7; ++i) {
       XParseColor(d,cmap,color_vals[i],&xcolour);
       XAllocColor(d,cmap,&xcolour);
       colours[i]=xcolour.pixel;
   }
 
-  XSetForeground(d,gc,colours[Black]);
+  XSetForeground(d,gc,colours[BLACK]);
 
   // Make window non-resizeable.
   XSizeHints hints;
@@ -65,10 +66,15 @@ int Xwindow::getHeight() const { return height; }
 void Xwindow::fillRectangle(int x, int y, int width, int height, int colour) {
   XSetForeground(d, gc, colours[colour]);
   XFillRectangle(d, w, gc, x, y, width, height);
-  XSetForeground(d, gc, colours[Black]);
+  XSetForeground(d, gc, colours[BLACK]);
 }
 
 void Xwindow::drawString(int x, int y, string msg) {
   XDrawString(d, w, DefaultGC(d, s), x, y, msg.c_str(), msg.length());
 }
 
+void Xwindow::drawImage(int x, int y, std::string file) {
+	XImage* xim = loadImage(file.c_str(), d);
+	XPutImage(d, w, gc, xim, 0, 0, x, y, xim->width, xim->height);
+	XDestroyImage(xim);
+}

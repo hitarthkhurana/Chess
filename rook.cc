@@ -8,10 +8,6 @@ const int CASTLE_SIZE = 8, CASTLE_IND1 = 4, CASTLE_IND2 = 5;
 Rook::Rook(shared_ptr<ChessBoard> board, int row, int col, int color) :
 	ChessPiece(board, row, col, color, WHITE_CHAR, BLACK_CHAR), moved(false) {}
 
-void Rook::display() {
-
-}
-
 vector<vector<int>> Rook::getMoves() {
 	vector<vector<int>> ans = dirMoves(DIRS);
 	auto real_board = board.lock();

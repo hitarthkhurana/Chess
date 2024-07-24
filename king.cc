@@ -7,10 +7,6 @@ const vector<pair<int, int>> CASTLE_DIRS = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
 King::King(shared_ptr<ChessBoard> board, int row, int col, int color) :
 	ChessPiece(board, row, col, color, WHITE_CHAR, BLACK_CHAR), moved(false) {}
 
-void King::display() {
-	
-}
-
 vector<vector<int>> King::getMoves() {
 	vector<vector<int>> ans = ChessPiece::offsetMoves(OFFSETS);
 	auto real_board = board.lock();

@@ -4,7 +4,7 @@
 
 const int SIZE = 8;
 const int PLAYER_CNT = 2;
-const int CELL_SIZE = 100;
+const int CELL_SIZE = 90;
 const vector<string> PLACEMENTS = {
 	"rnbqkbnr",
 	"pppppppp",
@@ -28,8 +28,9 @@ void ChessBoard1V1::init() {
 		for (int j = 0; j < SIZE; j++) {
 			cells[i][j] = make_unique<ChessCell>(
 				shared_from_this(),
+				i, j,
 				(i + j) % 2 ? ChessCell::LIGHT : ChessCell::DARK,
-				j * CELL_SIZE, (SIZE - i - 1) * CELL_SIZE, CELL_SIZE
+				CELL_SIZE
 			);
 				
 		}
@@ -38,6 +39,7 @@ void ChessBoard1V1::init() {
 }
 
 void ChessBoard1V1::reset() {
+	init();
 	for (int i = 0; i < SIZE; i++) {
 		for (int j = 0; j < SIZE; j++) {
 			pieces[i][j] = ChessPiece::fromString(
@@ -84,4 +86,8 @@ void ChessBoard1V1::print() {
 bool ChessBoard1V1::validPos(int row, int col) {
 	init();
 	return 0 <= row && row < SIZE && 0 <= col && col < SIZE;
+}
+
+pair<int, int> ChessBoard1V1::getCoords(int row, int col) {
+	return {col * CELL_SIZE, (SIZE - row - 1) * CELL_SIZE};
 }

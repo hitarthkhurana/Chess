@@ -9,23 +9,24 @@ class Xwindow {
   Window w;
   int s, width, height;
   GC gc;
-  unsigned long colours[5];
+  unsigned long colours[7];
 
  public:
   Xwindow(int width=500, int height=500);  // Constructor; displays the window.
   ~Xwindow();                              // Destructor; destroys the window.
 
-  enum {White=0, Black, Red, Green, Blue}; // Available colours.
+  enum {WHITE = 0, BLACK, RED, GREEN, BLUE, LIGHT_GREEN, DARK_GREEN}; // Available colours.
 
   int getWidth() const;
   int getHeight() const;
 
   // Draws a rectangle
-  void fillRectangle(int x, int y, int width, int height, int colour=Black);
+  void fillRectangle(int x, int y, int width, int height, int colour=BLACK);
 
   // Draws a string
   void drawString(int x, int y, std::string msg);
 
+  void drawImage(int x, int y, std::string file);
 };
 
 #endif

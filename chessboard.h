@@ -30,17 +30,14 @@ public:
 	virtual bool validPos(int row, int col) = 0;
 	shared_ptr<ChessPiece> getPiece(int row, int col);
 	void setPlayer(int index, shared_ptr<Player> player);
-	void placePiece(shared_ptr<ChessPiece> piece, int row, int col);
 	void placePiece(const string &piece, const string &pos);
-	void removePiece(int row, int col);
 	void removePiece(const string &pos);
-	void setTurn(int color);
 	bool setTurn(const string &color);
 	bool hasValidSetup();
-	bool move(int r1, int c1, int r2, int c2);
 	bool move(const string &from, const string &to, const string &promotion);
 	shared_ptr<Player> getCurrentPlayer();
 	bool undo();
+	virtual pair<int, int> getCoords(int row, int col) = 0;
 };
 
 #endif

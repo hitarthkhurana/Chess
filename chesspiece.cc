@@ -7,6 +7,12 @@
 #include "knight.h"
 #include "player.h"
 
+const string ASSETS_DIR = "./assets/";
+const string LIGHT_PREFIX = "l";
+const string DARK_PREFIX = "d";
+const vector<string> COLOR_PREFIXES = {"b", "w"};
+const string IMAGE_EXTENSION = ".png";
+
 shared_ptr<ChessPiece> ChessPiece::fromString(const string &s, shared_ptr<ChessBoard> board, int row, int col) {
 	switch (s[0]) {
 		case Rook::WHITE_CHAR:
@@ -80,6 +86,16 @@ vector<vector<int>> ChessPiece::dirMoves(const vector<pair<int, int>> &dirs) {
 void ChessPiece::setPos(int row, int col) {
 	this->row = row;
 	this->col = col;
+}
+
+void ChessPiece::display() {
+	string filename = ASSETS_DIR;
+	filename += (row + col) % 2 ? LIGHT_PREFIX : DARK_PREFIX;
+	filename += COLOR_PREFIXES[color];
+	filename += black_char;
+	filename += IMAGE_EXTENSION;
+	auto [x, y] = board.lock()->getCoords(row, col);
+	window->drawImage(x, y, filename);
 }
 
 void ChessPiece::print() {

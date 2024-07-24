@@ -19,11 +19,12 @@ protected:
 	char white_char, black_char; // use static member instead?
 
 public:
-	static shared_ptr<ChessPiece> fromString(const string &s, shared_ptr<ChessBoard> board, int row = -1, int col = -1);
-	ChessPiece(shared_ptr<ChessBoard>, int row, int col, int color, char white_car, char black_char);
+	static shared_ptr<ChessPiece> fromString(const string &s, shared_ptr<ChessBoard> board, int row, int col);
+	ChessPiece(shared_ptr<ChessBoard> board, int row, int col, int color, char white_char, char black_char);
 	virtual vector<vector<int>> getMoves() = 0;
 	virtual void setPos(int row, int col);
 	void print() override;
+	void display() override;
 	int getColor();
 };
 
