@@ -6,13 +6,11 @@
 // use libpng to read png into array of hex colors
 int* read_png(const char* file_name, int* w, int* h){
   // based on http://zarb.org/~gc/html/libpng.html
-  int x, y, z, W, H;
+  int x, y, W, H;
   int _width, _height;
   png_byte color_type;
-  png_byte bit_depth;
   png_structp png_ptr;
   png_infop info_ptr;
-  int number_of_passes;
   png_bytep * row_pointers;
   char header[8];
   FILE *fp = fopen(file_name, "rb");
@@ -30,8 +28,6 @@ int* read_png(const char* file_name, int* w, int* h){
   _width = png_get_image_width(png_ptr, info_ptr);
   _height = png_get_image_height(png_ptr, info_ptr);
   color_type = png_get_color_type(png_ptr, info_ptr);
-  bit_depth = png_get_bit_depth(png_ptr, info_ptr);
-  number_of_passes = png_set_interlace_handling(png_ptr);
   png_read_update_info(png_ptr, info_ptr);
   if (setjmp(png_jmpbuf(png_ptr)))return NULL;
   row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * _height);

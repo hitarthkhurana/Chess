@@ -10,16 +10,16 @@ class ChessBoard;
 class Player {
 protected:
 	int color, wins;
-	shared_ptr<ChessBoard> board;
+	weak_ptr<ChessBoard> board;
 
 public:
+	virtual ~Player() = default;
 	static shared_ptr<Player> fromString(const string &s, shared_ptr<ChessBoard> board, int color);
 	enum Colors {
 		BLACK = 0, WHITE, BLUE, GREEN, YELLOW, RED
 	};
 
 	Player(shared_ptr<ChessBoard> board, int color);
-	virtual void makeNextMove() = 0;
 	bool getColor();
 	int getWins();
 	void incrementWins();

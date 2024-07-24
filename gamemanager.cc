@@ -14,13 +14,17 @@ GameManager::GameManager() :
 }
 
 void GameManager::startGame(const string& whitePlayer, const string& blackPlayer) {
-	board->setPlayer(1, Player::fromString(whitePlayer, board, Player::WHITE));
-	board->setPlayer(2, Player::fromString(blackPlayer, board, Player::BLACK));
-    
-    cout << "Starting game between " << whitePlayer << " and " << blackPlayer << "." << endl;
-	gameActive = true;
-	board->print();
-	board->display();
+	if (gameActive) {
+		cout << "A game is already in progress." << endl;
+	} else {
+		board->setPlayer(1, Player::fromString(whitePlayer, board, Player::WHITE));
+		board->setPlayer(2, Player::fromString(blackPlayer, board, Player::BLACK));
+		
+		cout << "Starting game between " << whitePlayer << " and " << blackPlayer << "." << endl;
+		gameActive = true;
+		board->print();
+		board->display();
+	}
 }
 
 void GameManager::resign() {
@@ -38,22 +42,26 @@ void GameManager::resign() {
 }
 
 void GameManager::processMove(const string& moveCommand) {
-    istringstream iss(moveCommand);
-    string start, end, promotion;
-    iss >> start >> end >> promotion;
+	if (gameActive) {
+		istringstream iss(moveCommand);
+		string start, end, promotion;
+		iss >> start >> end >> promotion;
 
-    bool valid = board->move(start, end, promotion);
+		bool valid = board->move(start, end, promotion);
 
-	if (valid) {
-		cout << "Moved from " << start << " to " << end;
-		if (!promotion.empty()) {
-			cout << " and the pawn is promoted to " << promotion;
+		if (valid) {
+			cout << "Moved from " << start << " to " << end;
+			if (!promotion.empty()) {
+				cout << " and the pawn is promoted to " << promotion;
+			}
+			cout << "." << endl;
+			board->print();
+			board->display();
+		} else {
+			cout << "Invalid move." << endl;
 		}
-		cout << "." << endl;
-		board->print();
-		board->display();
 	} else {
-		cout << "Invalid move." << endl;
+		cout << "Please start a game to perform a move." << endl;
 	}
 }
 

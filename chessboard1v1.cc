@@ -42,6 +42,7 @@ void ChessBoard1V1::reset() {
 	init();
 	for (int i = 0; i < SIZE; i++) {
 		for (int j = 0; j < SIZE; j++) {
+			updated[i][j] = true;
 			pieces[i][j] = ChessPiece::fromString(
 				string(1, PLACEMENTS[SIZE - i - 1][j]),
 				shared_from_this(),
@@ -51,13 +52,20 @@ void ChessBoard1V1::reset() {
 	}
 }
 
+// move methods to ChessBoard for 4 player
 void ChessBoard1V1::display() {
 	init();
 	for (int i = 0; i < SIZE; i++) {
 		for (int j = 0; j < SIZE; j++) {
-			cells[i][j]->display();
-			if (pieces[i][j]) {
-				pieces[i][j]->display();
+			if (!updated[i][j]) {
+				continue;
+			}
+			updated[i][j] = false;
+			if (cells[i][j]) {
+				cells[i][j]->display();
+				if (pieces[i][j]) {
+					pieces[i][j]->display();
+				}
 			}
 		}
 	}
@@ -70,7 +78,7 @@ void ChessBoard1V1::print() {
 		for (int j = 0; j < SIZE; j++) {
 			if (pieces[i][j]) {
 				pieces[i][j]->print();
-			} else {
+			} else if (cells[i][j]) {
 				cells[i][j]->print();
 			}
 		}

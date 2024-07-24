@@ -8,7 +8,7 @@ using namespace std;
 
 int main() {
 	cout << "Welcome to C++-Chess!" << endl;
-	cout << "Enter a command to continue" << endl;
+	cout << "Enter a command to continue." << endl;
 
 	GameManager gm;
 	string line;

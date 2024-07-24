@@ -21,8 +21,12 @@ protected:
 	vector<shared_ptr<Player>> players;
 	vector<vector<unique_ptr<ChessCell>>> cells;
 	vector<vector<shared_ptr<ChessPiece>>> pieces;
+	vector<vector<bool>> updated;
 	stack<vector<int>> all_moves;
 	stack<shared_ptr<ChessPiece>> removed_pieces;
+	void setPiece(int row, int col, shared_ptr<ChessPiece> piece);
+	void makeComputerMoves();
+	void processMove(const vector<int> &move);
 	
 public:
 	ChessBoard(shared_ptr<Xwindow> window, int player_cnt, int size);
@@ -38,6 +42,22 @@ public:
 	shared_ptr<Player> getCurrentPlayer();
 	bool undo();
 	virtual pair<int, int> getCoords(int row, int col) = 0;
+
+	class Iterator {
+	private:
+		friend class ChessBoard;
+		shared_ptr<ChessBoard> board;
+		int i, j;
+		Iterator(shared_ptr<ChessBoard> board, int i, int j);
+	
+	public:
+		Iterator& operator++();
+		shared_ptr<ChessPiece> operator*();
+		bool operator==(const Iterator &other);
+	};
+
+	Iterator begin();
+	Iterator end();
 };
 
 #endif
