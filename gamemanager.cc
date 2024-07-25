@@ -67,7 +67,7 @@ void GameManager::checkBoardStatus() {
 void GameManager::printLastMove() { 
 	auto move = board->getLastMove();
 	int sz = move.size();
-	cout << "Moved ";
+	cout << endl << "Moved ";
 	for (int i = 0; i < sz; i += MOVE_SIZE) {
 		if (i != 0) {
 			cout << " and ";

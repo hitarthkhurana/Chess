@@ -32,7 +32,8 @@ vector<vector<int>> King::getMoves() {
 			}
 		}
 	}
-	vector<vector<int>> adjusted_ans;
+	return ans;
+	/*vector<vector<int>> adjusted_ans;
 	set<pair<int, int>> bad_targets;
 	for (auto piece : *real_board) {
 		if (piece->getColor() == color) {
@@ -55,7 +56,7 @@ vector<vector<int>> King::getMoves() {
 			adjusted_ans.push_back(move);
 		}
 	}
-	return adjusted_ans;
+	return adjusted_ans;*/
 }
 
 void King::setPos(int row, int col, bool undo) {

@@ -1,15 +1,16 @@
 #include "chessboard.h"
 #include "chessboard1v1.h"
 #include "computer.h"
+#include "king.h"
 
 void ChessBoard::setPiece(int row, int col, shared_ptr<ChessPiece> piece) {
 	pieces[row][col] = piece;
 	updated[row][col] = true;
 }
 
-ChessBoard::ChessBoard(shared_ptr<Xwindow> window, int player_cnt, int size) :
+ChessBoard::ChessBoard(shared_ptr<Xwindow> window, int player_cnt, int size, int status) :
 	Displayable(window),
-	moveCnt(0),
+	moveCnt(0), status(status),
 	players(player_cnt),
 	cells(size),
 	pieces(size, vector<shared_ptr<ChessPiece>> (size)),
@@ -63,6 +64,37 @@ bool ChessBoard::setTurn(const string &color) {
 
 bool ChessBoard::hasValidSetup() {return 1;}
 
+bool ChessBoard::isMoveCheck(const vector<int> &move) {
+	moveCnt--;
+	processMove(move, false);
+	bool ans = false;
+	int color = players[moveCnt % players.size()]->getColor();
+	for (auto piece : *this) {
+		if (piece->getColor() != color) {
+			auto moves = piece->getMoves();
+			for (auto &cur_move : moves) {
+				int sz = cur_move.size();
+				for (int i = 0; i < sz; i += MOVE_SIZE) {
+					auto piece2 = pieces[cur_move[i + 2]][cur_move[i + 3]];
+					if (auto king = dynamic_pointer_cast<King>(piece2); king && king->getColor() == color) {
+						ans = true;
+						break;
+					}
+				}
+				if (ans) {
+					break;
+				}
+			}
+			if (ans) {
+				break;
+			}
+		}
+	}
+	moveCnt++;
+	undo(false);
+	return ans;
+}
+
 bool ChessBoard::move(const string &from, const string &to, const string &promotion) {
 	// need to account for promotion
 	int r1 = from[1] - '1', c1 = from[0] - 'a', r2 = to[1] - '1', c2 = to[0] - 'a';
@@ -85,24 +117,10 @@ bool ChessBoard::move(const string &from, const string &to, const string &promot
 			}
 		}
 	}
-	if (index == -1) {
+	if (index == -1 || isMoveCheck(moves[index])) {
 		return false;
 	}
 	processMove(moves[index]);
-	// If in check, the check must be removed.
-	if (status == ChessBoard1V1::CHECK) {
-		moveCnt--;
-		updateStatus();
-		if (status == ChessBoard1V1::CHECK || status == ChessBoard1V1::CHECKMATE) {
-			moveCnt++;
-			undo();
-			updateStatus();
-			return false;
-		} else {
-			moveCnt++;
-		}
-	}
-	updateStatus();
 	return true;
 }
 
@@ -110,7 +128,7 @@ shared_ptr<Player> ChessBoard::getCurrentPlayer() {
 	return players[moveCnt % players.size()];
 }
 
-bool ChessBoard::undo() {
+bool ChessBoard::undo(bool statusUpdate) {
 	if (all_moves.empty()) {
 		return false;
 	}
@@ -119,17 +137,19 @@ bool ChessBoard::undo() {
 	for (int i = sz - MOVE_SIZE; i >= 0; i -= MOVE_SIZE) {
 		int a = move[i], b = move[i + 1], c = move[i + 2], d = move[i + 3];
 		setPiece(a, b, pieces[c][d]);
-		pieces[a][b]->setPos(c, d, true);
+		pieces[a][b]->setPos(a, b, true);
 		setPiece(c, d, removed_pieces.top());
 		removed_pieces.pop();
 	}
 	all_moves.pop();
-	updateStatus();
 	moveCnt--;
+	if (statusUpdate) {
+		updateStatus();
+	}
 	return true;
 }
 
-void ChessBoard::processMove(const vector<int> &move) {
+void ChessBoard::processMove(const vector<int> &move, bool statusUpdate) {
 	int sz = move.size();
 	for (int i = 0; i < sz; i += MOVE_SIZE) {
 		int a = move[i], b = move[i + 1], c = move[i + 2], d = move[i + 3];
@@ -140,6 +160,9 @@ void ChessBoard::processMove(const vector<int> &move) {
 	}
 	all_moves.push(move);
 	moveCnt++;
+	if (statusUpdate) {
+		updateStatus();
+	}
 }
 
 void ChessBoard::makeComputerMove() {
@@ -149,7 +172,6 @@ void ChessBoard::makeComputerMove() {
 	if (computer) {
 		auto move = computer->getNextMove();
 		processMove(move);
-		updateStatus();
 	}
 }
 

@@ -2,7 +2,7 @@
 #include "player.h"
 
 Pawn::Pawn(shared_ptr<ChessBoard> board, int row, int col, int color) :
-	ChessPiece(board, row, col, color, WHITE_CHAR, BLACK_CHAR) {}
+	ChessPiece(board, row, col, color, WHITE_CHAR, BLACK_CHAR), moveCnt(0) {}
 
 vector<vector<int>> Pawn::getMoves() {
 	int row2 = row, col2 = col;
@@ -15,6 +15,9 @@ vector<vector<int>> Pawn::getMoves() {
 	vector<vector<int>> ans;
 	if (!real_board->getPiece(row2, col2)) {
 		ans.push_back({row, col, row2, col2});
+	}
+	if (moveCnt == 0) {
+		ans.push_back({row, col, (row2 - row) * 2 + row, (col2 - col) * 2 + col});
 	}
 	if (real_board->validPos(row2, col2 + 1)) {
 		auto piece = real_board->getPiece(row2, col2 + 1);
@@ -29,4 +32,9 @@ vector<vector<int>> Pawn::getMoves() {
 		}
 	}
 	return ans;
+}
+
+void Pawn::setPos(int row, int col, bool undo) {
+	ChessPiece::setPos(row, col);
+	moveCnt += undo ? -1 : 1;
 }

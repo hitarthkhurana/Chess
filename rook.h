@@ -10,7 +10,7 @@ using namespace std;
 
 class Rook : public ChessPiece {
 private:
-	bool moveCnt;
+	int moveCnt;
 
 public:
 	static const char WHITE_CHAR = 'R', BLACK_CHAR = 'r';

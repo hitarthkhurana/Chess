@@ -11,7 +11,8 @@ using namespace std;
 class ChessBoard;
 
 class ChessPiece : public Displayable {
-protected:
+// protected:
+public: // temporary
 	vector<vector<int>> offsetMoves(const vector<pair<int, int>> &offsets);
 	vector<vector<int>> dirMoves(const vector<pair<int, int>> &dirs);
 	weak_ptr<ChessBoard> board;

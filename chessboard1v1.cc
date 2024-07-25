@@ -21,8 +21,15 @@ void ChessBoard1V1::updateStatus() {
 	int color = getCurrentPlayer()->getColor();
 	for (auto piece : *this) {
 		auto new_moves = piece->getMoves();
-		auto &moves = piece->getColor() == color ? cur_moves : next_moves;
-		moves.insert(moves.end(), new_moves.begin(), new_moves.end());
+		if (piece->getColor() == color) {
+			for (auto &move : new_moves) {
+				if (!isMoveCheck(move)) {
+					cur_moves.push_back(move);
+				}
+			}
+		} else {
+			next_moves.insert(next_moves.end(), new_moves.begin(), new_moves.end());
+		}
 	}
 	bool check = false;
 	shared_ptr<King> king;
@@ -41,8 +48,7 @@ void ChessBoard1V1::updateStatus() {
 		}
 	}
 	if (check) {
-		auto king_moves = king->getMoves();
-		if (king_moves.empty()) {
+		if (cur_moves.empty()) {
 			status = CHECKMATE; 
 		} else {
 			status = CHECK;
@@ -55,7 +61,7 @@ void ChessBoard1V1::updateStatus() {
 }
 
 ChessBoard1V1::ChessBoard1V1(shared_ptr<Xwindow> window) :
-	ChessBoard(window, PLAYER_CNT, SIZE), hasInit(false) {}
+	ChessBoard(window, PLAYER_CNT, SIZE, NORMAL), hasInit(false) {}
 
 void ChessBoard1V1::init() {
 	if (hasInit) {
