@@ -80,29 +80,35 @@ const int king_table[8][8] = {
 
 int getPieceValue(shared_ptr<ChessPiece> piece) {
     if (!piece) return 0;
-    switch (piece->getType()) {
-        case ChessPiece::PAWN: return P;
-        case ChessPiece::KNIGHT: return N;
-        case ChessPiece::BISHOP: return B;
-        case ChessPiece::ROOK: return R;
-        case ChessPiece::QUEEN: return Q;
-        case ChessPiece::KING: return K;
-        default: return 0;
-    }
+
+    // Use dynamic casting to infer the type and return appropriate values
+    if (dynamic_pointer_cast<Pawn>(piece)) return P;
+    if (dynamic_pointer_cast<Knight>(piece)) return N;
+    if (dynamic_pointer_cast<Bishop>(piece)) return B;
+    if (dynamic_pointer_cast<Rook>(piece)) return R;
+    if (dynamic_pointer_cast<Queen>(piece)) return Q;
+    if (dynamic_pointer_cast<King>(piece)) return K;
+
+    throw invalid_argument("Unknown piece type");
 }
 
 int getPieceSquareValue(shared_ptr<ChessPiece> piece, int row, int col) {
     if (!piece) return 0;
     int score = 0;
-    switch (piece->getType()) {
-        case ChessPiece::PAWN: score = pawn_table[row][col]; break;
-        case ChessPiece::KNIGHT: score = knight_table[row][col]; break;
-        case ChessPiece::BISHOP: score = bishop_table[row][col]; break;
-        case ChessPiece::ROOK: score = rook_table[row][col]; break;
-        case ChessPiece::QUEEN: score = queen_table[row][col]; break;
-        case ChessPiece::KING: score = king_table[row][col]; break;
-        default: break;
-    }
+
+    if (dynamic_pointer_cast<Pawn>(piece)) 
+        score = pawn_table[row][col];
+    else if (dynamic_pointer_cast<Knight>(piece))
+        score = knight_table[row][col];
+    else if (dynamic_pointer_cast<Bishop>(piece))
+        score = bishop_table[row][col];
+    else if (dynamic_pointer_cast<Rook>(piece)) 
+        score = rook_table[row][col];
+    else if (dynamic_pointer_cast<Queen>(piece))
+        score = queen_table[row][col];
+    else if (dynamic_pointer_cast<King>(piece))
+        score = king_table[row][col];
+
     return piece->getColor() == Player::WHITE ? score : -score;
 }
 
@@ -114,6 +120,43 @@ int evaluateBoard(shared_ptr<ChessBoard> board) {
         score += getPieceValue(piece) + getPieceSquareValue(piece, row, col);
     }
     return score;
+}
+
+int negamax(shared_ptr<ChessBoard> board, int depth, int alpha, int beta, int color) {
+    if (depth == 0) {
+        return color * evaluateBoard(board);
+    }
+
+    int maxEval = numeric_limits<int>::min();
+    auto moves = board->getAllMoves(color);
+    for (const auto& move : moves) {
+        board->processMove(move);
+        int eval = -negamax(board, depth - 1, -beta, -alpha, -color);
+        board->undo();
+        maxEval = max(maxEval, eval);
+        alpha = max(alpha, eval);
+        if (alpha >= beta) break;
+    }
+    return maxEval;
+}
+
+vector<int> Computer::getNextMove() {
+    vector<int> bestMove;
+    int maxEval = numeric_limits<int>::min();
+    auto real_board = board.lock();
+    auto moves = real_board->getAllMoves(color);
+
+    for (const auto& move : moves) {
+        real_board->processMove(move);
+        int eval = -negamax(real_board, 3, numeric_limits<int>::min(), numeric_limits<int>::max(), -color);
+        real_board->undo();
+        if (eval > maxEval) {
+            maxEval = eval;
+            bestMove = move;
+        }
+    }
+
+    return bestMove;
 }
 
 vector<int> Computer::getNextMove() {
