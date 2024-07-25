@@ -14,6 +14,9 @@ const vector<string> COLOR_PREFIXES = {"b", "w"};
 const string IMAGE_EXTENSION = ".png";
 
 shared_ptr<ChessPiece> ChessPiece::fromString(const string &s, shared_ptr<ChessBoard> board, int row, int col) {
+	if (s.size() != 1) {
+		return shared_ptr<ChessPiece>();
+	}
 	switch (s[0]) {
 		case Rook::WHITE_CHAR:
 			return make_shared<Rook>(board, row, col, Player::WHITE);

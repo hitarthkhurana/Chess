@@ -1,15 +1,15 @@
 #ifndef GAMEMANAGER_H
 #define GAMEMANAGER_H
 
+#include <memory>
+#include <string>
+#include <vector>
+#include <sstream>
 #include "player.h"
 #include "human.h"
 #include "computer.h"
 #include "chessboard.h"
 #include "xwindow.h"
-#include <memory>
-#include <string>
-#include <vector>
-#include <sstream>
 
 using namespace std;
 
@@ -18,7 +18,7 @@ private:
     shared_ptr<Xwindow> window;
     shared_ptr<ChessBoard> board;
     bool setupMode, gameActive;
-	int white_wins, black_wins;
+	int whiteWins, blackWins, humanMoveCnt;
 
 public:
     GameManager();
@@ -26,7 +26,7 @@ public:
     void startGame(const string& whitePlayer, const string& blackPlayer);
     void resign();
     void checkBoardState();
-    void processMove(const string& moveCommand);
+    void processMove(const string& from, const string& to, const string &promotion);
     void printLastMove();
     void makeComputerMoves();
     void enterSetupMode();
@@ -35,7 +35,8 @@ public:
     void setTurn(const string& color);
     void doneSetup();
 	void undoMove();
-	void displayScore();
+	void printScore();
+	void printHelp();
     void processCommand(const string& command);
 };
 

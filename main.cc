@@ -20,5 +20,5 @@ int main() {
 	}
 
 	cout << endl << endl;
-	gm.displayScore();
+	gm.printScore();
 }

@@ -11,7 +11,8 @@
 
 using namespace std;
 
-const int MOVE_SIZE = 4;
+const int MOVE_SIZE = 4, POS_SIZE = 2;
+const int ROW_START = '1', COL_START = 'a';
 
 class ChessPiece;
 class ChessCell;
@@ -36,10 +37,10 @@ public:
 	shared_ptr<ChessPiece> getPiece(int row, int col);
 	void setPlayer(int index, shared_ptr<Player> player);
 	shared_ptr<Player> getPlayer(int index);
-	void placePiece(const string &piece, const string &pos);
-	void removePiece(const string &pos);
-	bool setTurn(const string &color);
-	bool hasValidSetup();
+	bool placePiece(const string &piece, const string &pos);
+	bool removePiece(const string &pos);
+	void setTurn(int color);
+	virtual bool hasValidSetup() = 0;
 	bool doesMoveSelfCheck(const vector<int> &move);
 	bool move(const string &from, const string &to, const string &promotion);
 	shared_ptr<Player> getCurrentPlayer();

@@ -19,6 +19,7 @@ public:
 	void display() override;
 	void print() override;
 	bool validPos(int row, int col) override;
+	bool hasValidSetup() override;
 	pair<int, int> getCoords(int row, int col) override;
 
 	enum State {

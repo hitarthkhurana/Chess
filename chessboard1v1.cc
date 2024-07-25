@@ -1,6 +1,7 @@
 #include "chesscell.h"
 #include "chessboard1v1.h"
 #include "king.h"
+#include "pawn.h"
 
 const int SIZE = 8;
 const int PLAYER_CNT = 2;
@@ -138,7 +139,7 @@ void ChessBoard1V1::print() {
 	}
 	cout << endl << "  ";
 	for (int i = 0; i < SIZE; i++) {
-		cout << static_cast<char> ('a' + i);
+		cout << static_cast<char> (COL_START + i);
 	}
 	cout << endl;
 }
@@ -146,6 +147,37 @@ void ChessBoard1V1::print() {
 bool ChessBoard1V1::validPos(int row, int col) {
 	init();
 	return 0 <= row && row < SIZE && 0 <= col && col < SIZE;
+}
+
+bool ChessBoard1V1::hasValidSetup() {
+	bool white_king = false, black_king = false;
+	if (state == CHECK || state == CHECKMATE) {
+		return false;
+	}
+	moveCnt++;
+	updateState();
+	if (state == CHECK || state == CHECKMATE) {
+		moveCnt--;
+		updateState();
+		return false;
+	}
+	moveCnt--;
+	updateState();
+	for (int i = 0; i < SIZE; i++) {
+		for (int j = 0; j < SIZE; j++) {
+			auto king = dynamic_pointer_cast<King>(pieces[i][j]);
+			if (king) {
+				bool &has_king = king->getColor() == Player::WHITE ? white_king : black_king;
+				if (has_king) {
+					return false;
+				}
+				has_king = true;
+			 } else if (i == 0 || (i == SIZE - 1 && dynamic_pointer_cast<Pawn>(pieces[i][j]))) {
+				 return false;
+			 }
+		}
+	}
+	return white_king && black_king;
 }
 
 pair<int, int> ChessBoard1V1::getCoords(int row, int col) {

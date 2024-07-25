@@ -33,36 +33,39 @@ shared_ptr<Player> ChessBoard::getPlayer(int index) {
 	return players[index - 1];
 }
 
-void ChessBoard::placePiece(const string &piece, const string &pos) {
-	int row = pos[1] - '1', col = pos[0] - 'a';
-	setPiece(row, col, ChessPiece::fromString(piece, shared_from_this(), row, col));
-}
-
-void ChessBoard::removePiece(const string &pos) {
-	setPiece(pos[1] - '1', pos[0] - 'a', shared_ptr<ChessPiece>());
-}
-
-bool ChessBoard::setTurn(const string &color) {
-	int color_num;
-	if (color == "white") { // make const?
-		color_num = Player::WHITE;
-	} else if (color == "black") {
-		color_num = Player::BLACK;
-	} else {
+bool ChessBoard::placePiece(const string &piece, const string &pos) {
+	if (pos.size() != POS_SIZE) {
 		return false;
 	}
-	int sz = players.size();
-	for (int i = 0; i < sz; i++) {
-		auto &player = players[i];
-		if (player->getColor() == color_num) {
-			moveCnt = i;
-			break;
-		}
+	int row = pos[1] - ROW_START, col = pos[0] - COL_START;
+	if (!validPos(row, col)) {
+		return false;
 	}
+	auto piece2 = ChessPiece::fromString(piece, shared_from_this(), row, col);
+	if (!piece2) {
+		return false;
+	}
+	setPiece(row, col, piece2);
 	return true;
 }
 
-bool ChessBoard::hasValidSetup() {return 1;}
+bool ChessBoard::removePiece(const string &pos) {
+	if (pos.size() != POS_SIZE) {
+		return false;
+	}
+	int r = pos[1] - ROW_START, c = pos[0] - COL_START;
+	if (!validPos(r, c)) {
+		return false;
+	}
+	setPiece(r, c, shared_ptr<ChessPiece>());
+	return true;
+}
+
+void ChessBoard::setTurn(int color) {
+	if (color != getCurrentPlayer()->getColor()) {
+		swap(players[0], players[1]);
+	}
+}
 
 bool ChessBoard::doesMoveSelfCheck(const vector<int> &move) {
 	moveCnt--;
@@ -96,8 +99,11 @@ bool ChessBoard::doesMoveSelfCheck(const vector<int> &move) {
 }
 
 bool ChessBoard::move(const string &from, const string &to, const string &promotion) {
+	if (from.size() != POS_SIZE || to.size() != POS_SIZE) {
+		return false;
+	}
 	// need to account for promotion
-	int r1 = from[1] - '1', c1 = from[0] - 'a', r2 = to[1] - '1', c2 = to[0] - 'a';
+	int r1 = from[1] - ROW_START, c1 = from[0] - COL_START, r2 = to[1] - ROW_START, c2 = to[0] - COL_START;
 	if (!validPos(r1, c1) || !validPos(r2, c2) || !pieces[r1][c1]) {
 		return false;
 	}

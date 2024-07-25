@@ -1,29 +1,43 @@
 #include <iostream>
 #include <cctype>
+#include <set>
 #include "gamemanager.h"
 #include "chessboard1v1.h"
 #include "computer.h"
 
 const int WINDOW_SIZE = 720;
 const int WHITE_TURN = 1, BLACK_TURN = 2;
+const set<string> VALID_PLAYERS = {"human", "computer1", "computer2", "computer3", "computer4"};
+
+string tolower(const string& s) {
+	string ans = s;
+	for (char c : ans) {
+		c = tolower(c);
+	}
+	return ans;
+}
 
 GameManager::GameManager() :
     window(make_shared<Xwindow>(WINDOW_SIZE, WINDOW_SIZE)),
     board(make_shared<ChessBoard1V1>(window)),
     setupMode(false), gameActive(false),
-	white_wins(0), black_wins(0) {
+	whiteWins(0), blackWins(0), humanMoveCnt(0) {
 	
 	board->display();
+	board->setPlayer(WHITE_TURN, Player::fromString("human", board, Player::WHITE));
+	board->setPlayer(BLACK_TURN, Player::fromString("human", board, Player::BLACK));
 }
 
 void GameManager::startGame(const string& whitePlayer, const string& blackPlayer) {
 	if (gameActive) {
 		cout << "A game is already in progress." << endl;
+	} else if (!VALID_PLAYERS.count(whitePlayer) || !VALID_PLAYERS.count(blackPlayer)) {
+		cout << "Both player must be specified as either 'human' or 'computer[1-4]'." << endl;
 	} else {
 		board->setPlayer(WHITE_TURN, Player::fromString(whitePlayer, board, Player::WHITE));
 		board->setPlayer(BLACK_TURN, Player::fromString(blackPlayer, board, Player::BLACK));
 		
-		cout << "Starting game between " << whitePlayer << " and " << blackPlayer << "." << endl;
+		cout << "Starting game between " << whitePlayer << " and " << blackPlayer << "." << endl << endl;
 		gameActive = true;
 		board->print();
 		board->display();
@@ -35,10 +49,10 @@ void GameManager::resign() {
     if (gameActive) {
 		if (board->getCurrentPlayer()->getColor() == Player::BLACK) {
 			cout << "White wins!" << endl;
-			white_wins++;
+			whiteWins++;
 		} else {
 			cout << "Black wins!" << endl;
-			black_wins++;
+			blackWins++;
 		}
 		gameActive = false;
 		board->reset();
@@ -74,9 +88,9 @@ void GameManager::printLastMove() {
 			cout << " and ";
 		}
 		cout << "from ";
-		cout << static_cast<char>(move[i + 1] + 'a') << (move[i + 0] + 1);
+		cout << static_cast<char>(move[i + 1] + COL_START) << (move[i + 0] + 1);
 		cout << " to ";
-		cout << static_cast<char>(move[i + 3] + 'a') << (move[i + 2] + 1);
+		cout << static_cast<char>(move[i + 3] + COL_START) << (move[i + 2] + 1);
 	}
 	// board->...promotion...();
 	cout << "." << endl;
@@ -98,17 +112,14 @@ void GameManager::makeComputerMoves() {
 	}
 }
 
-void GameManager::processMove(const string& moveCommand) {
+void GameManager::processMove(const string& from, const string& to, const string& promotion) {
 	if (gameActive) {
-		istringstream iss(moveCommand);
-		string start, end, promotion;
-		iss >> start >> end >> promotion;
-
-		bool valid = board->move(start, end, promotion);
+		bool valid = board->move(from, to, promotion);
 
 		if (valid) {
 			board->print();
 			board->display();
+			humanMoveCnt++;
 			printLastMove();
 			checkBoardState();
 			makeComputerMoves();
@@ -131,10 +142,13 @@ void GameManager::enterSetupMode() {
 
 void GameManager::placePiece(const string& piece, const string& position) {
     if (setupMode) {
-        board->placePiece(piece, position);
-		board->print();
-		board->display();
-        cout << "Placed " << piece << " at " << position << "." << endl;
+        if (board->placePiece(piece, position)) {
+			board->print();
+			board->display();
+			cout << "Placed " << piece << " at " << position << "." << endl;
+		} else {
+			cout << "Invalid piece or position." << endl;
+		}
     } else {
         cout << "Not currently in setup mode." << endl;
     }
@@ -142,10 +156,13 @@ void GameManager::placePiece(const string& piece, const string& position) {
 
 void GameManager::removePiece(const string& position) {
     if (setupMode) {
-        board->removePiece(position);
-		board->print();
-		board->display();
-        cout << "Removed piece from " << position << "." << endl;
+		if (board->removePiece(position)) {
+			board->print();
+			board->display();
+			cout << "Removed piece from " << position << "." << endl;
+		} else {
+			cout << "Invalid position." << endl;
+		}
     } else {
         cout << "Not currently in setup mode." << endl;
     }
@@ -153,12 +170,16 @@ void GameManager::removePiece(const string& position) {
 
 void GameManager::setTurn(const string& color) {
     if (setupMode) {
-        bool success = board->setTurn(color);
-		if (!success) {
-			cout << "Invalid color." << endl;
+		if (color == "white") {
+			board->setTurn(Player::WHITE);
+		} else if (color == "black") {
+			board->setTurn(Player::BLACK);
 		} else {
-			cout << color << " will go first." << endl;
+			cout << "Invalid color." << endl;
+			return;
 		}
+		cout << static_cast<char>(toupper(color[0])) << color.substr(1);
+		cout << " will go first." << endl;
     } else {
         cout << "Not currently in setup mode." << endl;
     }
@@ -166,7 +187,6 @@ void GameManager::setTurn(const string& color) {
 
 void GameManager::doneSetup() {
     if (setupMode) {
-        // Validate board state
         if (board->hasValidSetup()) {
             setupMode = false;
             cout << "Setup complete." << endl;
@@ -183,67 +203,90 @@ void GameManager::doneSetup() {
 void GameManager::undoMove() {
 	if (!gameActive) {
 		cout << "No game in progress." << endl;
+	} else if (humanMoveCnt == 0) {
+		cout << "No moves to undo." << endl;
 	} else {
-		bool success = board->undo();
-		if (success) {
-			cout << "Undid last move." << endl;
-			board->print();
-			board->display();
-		} else {
-			cout << "No moves to undo." << endl;
+		while (dynamic_pointer_cast<Computer>(board->getCurrentPlayer())) {
+			board->undo();
 		}
+		board->undo();
+		board->print();
+		board->display();
+		humanMoveCnt--;
+		cout << "Undid last move." << endl;
 	}
 }
 
-void GameManager::displayScore() {
+void GameManager::printScore() {
 	cout << "Final score:" << endl;
-	cout << "White: " << white_wins << endl;
-	cout << "Black: " << black_wins << endl;
+	cout << "White: " << whiteWins << endl;
+	cout << "Black: " << blackWins << endl;
+}
+
+void GameManager::printHelp() {
+	cout << "Available commands:" << endl;
+	if (setupMode) {
+		cout << "  + PIECE POS -- adds the piece PIECE to position POS" << endl;
+		cout << "  - POS       -- removes the piece, if any, from position POS" << endl;
+		cout << "  = COLOUR    -- makes it COLOUR's turn to go first" << endl;
+		cout << "  done        -- leaves setup mode" << endl;
+	} else if (gameActive) {
+		cout << "  move POS1 POS2 -- moves the piece at POS1 to POS2" << endl;
+		cout << "  undo           -- undo moves until a human's turn is reached" << endl;
+		cout << "  resign         -- the current player resigns to end the game" << endl;
+
+	} else {
+		cout << "  game WHITE BLACK -- starts a new game between WHITE and BLACK" << endl;
+		cout << "  setup            -- enters setup mode" << endl;
+		cout << "  quit             -- exits the program" << endl;
+	}
 }
 
 void GameManager::processCommand(const string& command) {
     istringstream iss(command);
     string cmd;
     iss >> cmd;
-
-	for (char &c : cmd) {
-		c = tolower(c);
-	}
+	cmd = tolower(cmd);
 
 	if (cmd.empty()) {
 		return;
 	} else if (cmd == "game") {
         string whitePlayer, blackPlayer;
         iss >> whitePlayer >> blackPlayer;
-        startGame(whitePlayer, blackPlayer);
+        startGame(tolower(whitePlayer), tolower(blackPlayer));
     } else if (cmd == "resign") {
         resign();
     } else if (cmd == "move") {
-        string moveCommand;
-        getline(iss, moveCommand);
-        processMove(moveCommand);
+        string from, to, promotion;
+		iss >> from >> to >> promotion;
+        processMove(tolower(from), tolower(to), promotion);
     } else if (cmd == "setup") {
         enterSetupMode();
     } else if (cmd == "+") {
         string piece, position;
         iss >> piece >> position;
-        placePiece(piece, position);
+        placePiece(piece, tolower(position));
     } else if (cmd == "-") {
         string position;
         iss >> position;
-        removePiece(position);
+        removePiece(tolower(position));
     } else if (cmd == "=") {
         string color;
         iss >> color;
-        setTurn(color);
+        setTurn(tolower(color));
     } else if (cmd == "done") {
         doneSetup();
 	} else if (cmd == "undo") {
 		undoMove();
-	} else if (cmd == "exit" || cmd == "quit") {
+	} else if (cmd == "score") {
+		printScore();
+	} else if (cmd == "help") {
+		printHelp();
+	} else if (cmd == "quit") {
 		cout << "Bye!" << endl;
 		exit(0);
     } else {
         cout << "Unknown command." << endl;
+		cout << "Enter 'help' for a full list of commands." << endl;
     }
 }
