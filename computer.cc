@@ -106,7 +106,6 @@ int getPieceSquareValue(shared_ptr<ChessPiece> piece, int row, int col) {
 
     if (piece->getColor() == Player::BLACK) {
         row = 7 - row;
-        col = 7 - col;
     }
 
     if (dynamic_pointer_cast<Pawn>(piece))
