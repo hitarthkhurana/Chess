@@ -134,6 +134,21 @@ int evaluateBoard(shared_ptr<ChessBoard> board) {
     return score;
 }
 
+vector<vector<int>> getAllMoves(shared_ptr<ChessBoard> board, int color) {
+    vector<vector<int>> all_moves;
+    for (const auto& piece : *board) {
+        if (piece->getColor() == color) {
+            auto new_moves = piece->getMoves();
+            for (auto &move : new_moves) {
+                if (!board->doesMoveSelfCheck(move)) {
+                    all_moves.push_back(move);
+                }
+            }
+        }
+    }
+    return all_moves;
+}
+
 int negamax(shared_ptr<ChessBoard> board, int depth, int alpha, int beta, int color) {
     if (depth == 0) {
         return color * evaluateBoard(board);
@@ -150,21 +165,6 @@ int negamax(shared_ptr<ChessBoard> board, int depth, int alpha, int beta, int co
         if (alpha >= beta) break;
     }
     return maxEval;
-}
-
-vector<vector<int>> getAllMoves(shared_ptr<ChessBoard> board, int color) {
-    vector<vector<int>> all_moves;
-    for (const auto& piece : *board) {
-        if (piece->getColor() == color) {
-            auto new_moves = piece->getMoves();
-            for (auto &move : new_moves) {
-                if (!board->doesMoveSelfCheck(move)) {
-                    all_moves.push_back(move);
-                }
-            }
-        }
-    }
-    return all_moves;
 }
 
 vector<int> Computer::getNextMove() {
