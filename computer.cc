@@ -196,12 +196,13 @@ vector<int> Computer::getNextMove() {
     
         for (const auto& move : moves) {
             real_board->processMove(move);
-            int eval = -negamax(real_board, 3, -INF, INF, (color == Player::WHITE) ? Player::BLACK : Player::WHITE);
+            int eval = -negamax(real_board, 2, -INF, INF, Player::WHITE);
             real_board->undo();
             if (eval > maxEval) {
                 maxEval = eval;
                 bestMove = move;
             }
+            cout << eval << endl;
         }
         
         return bestMove;
