@@ -126,7 +126,7 @@ int getPieceSquareValue(shared_ptr<ChessPiece> piece, int row, int col) {
 
 int evaluateBoard(shared_ptr<ChessBoard> board) {
     int score = 0;
-    for (auto& piece : *board) {
+    for (const auto& piece : *board) {
         int row = piece->row;
         int col = piece->col;
         score += getPieceValue(piece) + getPieceSquareValue(piece, row, col);
