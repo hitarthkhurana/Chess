@@ -17,8 +17,19 @@ int Computer::getRandom(int low, int high) {
 	return (rd() - rd.min()) % (high - low + 1) + low;
 }
 
+const int INF = 1000000; // A large constant value for practical purposes
+
+Computer::Computer(shared_ptr<ChessBoard> board, int color, int level) :
+    Player(board, color), level(level) {}
+
+int Computer::getRandom(int low, int high) {
+    random_device rd;
+    return (rd() - rd.min()) % (high - low + 1) + low;
+}
+
 const int P = 100, N = 320, B = 330, R = 500, Q = 900, K = 20000;
 
+// Array representation for point-square tables (evaluation matrices)
 const int pawn_table[8][8] = {
     { 0,  0,  0,  0,  0,  0,  0,  0},
     {50, 50, 50, 50, 50, 50, 50, 50},
@@ -88,34 +99,38 @@ const int king_table[8][8] = {
 int getPieceValue(shared_ptr<ChessPiece> piece) {
     if (!piece) return 0;
 
+    // Use dynamic casting to infer the type and return appropriate values
     if (dynamic_pointer_cast<Pawn>(piece)) return P;
     if (dynamic_pointer_cast<Knight>(piece)) return N;
     if (dynamic_pointer_cast<Bishop>(piece)) return B;
     if (dynamic_pointer_cast<Rook>(piece)) return R;
     if (dynamic_pointer_cast<Queen>(piece)) return Q;
     if (dynamic_pointer_cast<King>(piece)) return K;
-
-    throw invalid_argument("Unknown piece type");
 }
 
 int getPieceSquareValue(shared_ptr<ChessPiece> piece, int row, int col) {
     if (!piece) return 0;
     int score = 0;
 
-    if (dynamic_pointer_cast<Pawn>(piece)) 
+    if (piece->getColor() == Player::BLACK) {
+        row = 7 - row;
+        col = 7 - col;
+    }
+
+    if (dynamic_pointer_cast<Pawn>(piece))
         score = pawn_table[row][col];
     else if (dynamic_pointer_cast<Knight>(piece))
         score = knight_table[row][col];
     else if (dynamic_pointer_cast<Bishop>(piece))
         score = bishop_table[row][col];
-    else if (dynamic_pointer_cast<Rook>(piece)) 
+    else if (dynamic_pointer_cast<Rook>(piece))
         score = rook_table[row][col];
     else if (dynamic_pointer_cast<Queen>(piece))
         score = queen_table[row][col];
     else if (dynamic_pointer_cast<King>(piece))
         score = king_table[row][col];
 
-    return piece->getColor() == Player::WHITE ? score : -score;
+    return score;
 }
 
 int evaluateBoard(shared_ptr<ChessBoard> board) {
@@ -133,7 +148,7 @@ int negamax(shared_ptr<ChessBoard> board, int depth, int alpha, int beta, int co
         return color * evaluateBoard(board);
     }
 
-    int maxEval = numeric_limits<int>::min();
+    int maxEval = -INF;
     auto moves = board->getAllMoves(color);
     for (const auto& move : moves) {
         board->processMove(move);
@@ -144,25 +159,6 @@ int negamax(shared_ptr<ChessBoard> board, int depth, int alpha, int beta, int co
         if (alpha >= beta) break;
     }
     return maxEval;
-}
-
-vector<int> Computer::getNextMove() {
-    vector<int> bestMove;
-    int maxEval = numeric_limits<int>::min();
-    auto real_board = board.lock();
-    auto moves = real_board->getAllMoves(color);
-
-    for (const auto& move : moves) {
-        real_board->processMove(move);
-        int eval = -negamax(real_board, 3, numeric_limits<int>::min(), numeric_limits<int>::max(), -color);
-        real_board->undo();
-        if (eval > maxEval) {
-            maxEval = eval;
-            bestMove = move;
-        }
-    }
-
-    return bestMove;
 }
 
 vector<int> Computer::getNextMove() {
@@ -187,8 +183,22 @@ vector<int> Computer::getNextMove() {
 		}
 	}
 	if (level >= 4) {
-		// do advanced stuff
-		// return answer
+		vector<int> bestMove;
+	    	int maxEval = -INF;
+	    	auto real_board = board.lock();
+	    	auto moves = real_board->getAllMoves(color);
+	
+		for (const auto& move : moves) {
+			real_board->processMove(move);
+			int eval = -negamax(real_board, 3, -INF, INF, -color);
+			real_board->undo();
+			if (eval > maxEval) {
+				maxEval = eval;
+				bestMove = move;
+			}
+		}
+		
+		return bestMove;
 	}
 	vector<vector<int>> preferred_moves;
 	if (level >= 2) {
