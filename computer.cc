@@ -19,14 +19,6 @@ int Computer::getRandom(int low, int high) {
 
 const int INF = 1000000; // A large constant value for practical purposes
 
-Computer::Computer(shared_ptr<ChessBoard> board, int color, int level) :
-    Player(board, color), level(level) {}
-
-int Computer::getRandom(int low, int high) {
-    random_device rd;
-    return (rd() - rd.min()) % (high - low + 1) + low;
-}
-
 const int P = 100, N = 320, B = 330, R = 500, Q = 900, K = 20000;
 
 // Array representation for point-square tables (evaluation matrices)
