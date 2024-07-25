@@ -4,7 +4,6 @@
 #include "player.h"
 #include "human.h"
 #include "computer.h"
-#include "score.h"
 #include "chessboard.h"
 #include "xwindow.h"
 #include <memory>
@@ -19,6 +18,7 @@ private:
     shared_ptr<Xwindow> window;
     shared_ptr<ChessBoard> board;
     bool setupMode, gameActive;
+	int white_wins, black_wins;
 
 public:
     GameManager();

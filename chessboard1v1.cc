@@ -13,7 +13,7 @@ const vector<string> PLACEMENTS = {
 	"--------",
 	"--------",
 	"PPPPPPPP",
-	"RNBKQBNR"
+	"RNBQKBNR"
 };
 
 void ChessBoard1V1::updateState() {
@@ -94,6 +94,14 @@ void ChessBoard1V1::reset() {
 			);
 		}
 	}
+	while (!removed_pieces.empty()) {
+		removed_pieces.pop();
+	}
+	while (!all_moves.empty()) {
+		all_moves.pop();
+	}
+	state = NORMAL;
+	moveCnt = 0;
 }
 
 // move methods to ChessBoard for 4 player

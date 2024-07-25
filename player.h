@@ -9,7 +9,7 @@ class ChessBoard;
 
 class Player {
 protected:
-	int color, wins;
+	int color;
 	weak_ptr<ChessBoard> board;
 
 public:
@@ -21,8 +21,6 @@ public:
 
 	Player(shared_ptr<ChessBoard> board, int color);
 	bool getColor();
-	int getWins();
-	void incrementWins();
 };
 
 #endif

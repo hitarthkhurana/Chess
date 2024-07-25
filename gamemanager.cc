@@ -10,7 +10,8 @@ const int WHITE_TURN = 1, BLACK_TURN = 2;
 GameManager::GameManager() :
     window(make_shared<Xwindow>(WINDOW_SIZE, WINDOW_SIZE)),
     board(make_shared<ChessBoard1V1>(window)),
-    setupMode(false), gameActive(false) {
+    setupMode(false), gameActive(false),
+	white_wins(0), black_wins(0) {
 	
 	board->display();
 }
@@ -34,10 +35,10 @@ void GameManager::resign() {
     if (gameActive) {
 		if (board->getCurrentPlayer()->getColor() == Player::BLACK) {
 			cout << "White wins!" << endl;
-			board->getPlayer(WHITE_TURN)->incrementWins();
+			white_wins++;
 		} else {
 			cout << "Black wins!" << endl;
-			board->getPlayer(BLACK_TURN)->incrementWins();
+			black_wins++;
 		}
 		gameActive = false;
 		board->reset();
@@ -196,8 +197,8 @@ void GameManager::undoMove() {
 
 void GameManager::displayScore() {
 	cout << "Final score:" << endl;
-	cout << "White: " << board->getPlayer(WHITE_TURN)->getWins() << endl;
-	cout << "Black: " << board->getPlayer(BLACK_TURN)->getWins() << endl;
+	cout << "White: " << white_wins << endl;
+	cout << "Black: " << black_wins << endl;
 }
 
 void GameManager::processCommand(const string& command) {
