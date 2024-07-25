@@ -127,8 +127,8 @@ int getPieceSquareValue(shared_ptr<ChessPiece> piece, int row, int col) {
 int evaluateBoard(shared_ptr<ChessBoard> board) {
     int score = 0;
     for (auto& piece : *board) {
-        int row = piece->getRow();
-        int col = piece->getCol();
+        int row = piece->row;
+        int col = piece->col;
         score += getPieceValue(piece) + getPieceSquareValue(piece, row, col);
     }
     return score;
@@ -140,7 +140,7 @@ int negamax(shared_ptr<ChessBoard> board, int depth, int alpha, int beta, int co
     }
 
     int maxEval = -INF;
-    auto moves = board->getAllMoves(color);
+    auto moves = getAllMoves(board, color);
     for (const auto& move : moves) {
         board->processMove(move);
         int eval = -negamax(board, depth - 1, -beta, -alpha, -color);
@@ -192,7 +192,7 @@ vector<int> Computer::getNextMove() {
 		vector<int> bestMove;
 	    	int maxEval = -INF;
 	    	auto real_board = board.lock();
-	    	auto moves = real_board->getAllMoves(color);
+	    	auto moves = getAllMoves(real_board, color);
 	
 		for (const auto& move : moves) {
 			real_board->processMove(move);
