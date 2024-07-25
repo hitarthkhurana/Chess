@@ -25,7 +25,7 @@ public:
 
     void startGame(const string& whitePlayer, const string& blackPlayer);
     void resign();
-    void checkBoardStatus();
+    void checkBoardState();
     void processMove(const string& moveCommand);
     void printLastMove();
     void makeComputerMoves();

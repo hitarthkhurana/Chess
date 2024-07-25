@@ -10,7 +10,7 @@ private:
 	bool hasInit;
 
 protected:
-	void updateStatus() override;
+	void updateState() override;
 
 public:
 	ChessBoard1V1(shared_ptr<Xwindow> window);
@@ -21,7 +21,7 @@ public:
 	bool validPos(int row, int col) override;
 	pair<int, int> getCoords(int row, int col) override;
 
-	enum PlayStatus {
+	enum State {
 		NORMAL = 0, CHECK, CHECKMATE, STALEMATE
 	};
 };

@@ -46,18 +46,18 @@ void GameManager::resign() {
     }
 }
 
-void GameManager::checkBoardStatus() {
-	int status = board->getStatus();
-	if (status == ChessBoard1V1::CHECK) {
+void GameManager::checkBoardState() {
+	int state = board->getState();
+	if (state == ChessBoard1V1::CHECK) {
 		if (board->getCurrentPlayer()->getColor() == Player::WHITE) {
 			cout << "White is in check." << endl;
 		} else {
 			cout << "Black is in check." << endl;
 		}
-	} else if (status == ChessBoard1V1::CHECKMATE) {
+	} else if (state == ChessBoard1V1::CHECKMATE) {
 		cout << "Checkmate! ";
 		resign();
-	} else if (status == ChessBoard1V1::STALEMATE) {
+	} else if (state == ChessBoard1V1::STALEMATE) {
 		cout << "Stalemate!" << endl;
 		gameActive = false;
 		board->reset();
@@ -87,12 +87,13 @@ void GameManager::makeComputerMoves() {
 		if (!computer) {
 			break;
 		}
+		cout << endl;
 		board->makeComputerMove();
 		board->display();
 		board->print();
 		cout << endl;
 		printLastMove();
-		checkBoardStatus();
+		checkBoardState();
 	}
 }
 
@@ -108,7 +109,7 @@ void GameManager::processMove(const string& moveCommand) {
 			board->print();
 			board->display();
 			printLastMove();
-			checkBoardStatus();
+			checkBoardState();
 			makeComputerMoves();
 		} else {
 			cout << "Invalid move." << endl;

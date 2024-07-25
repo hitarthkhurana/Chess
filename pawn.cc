@@ -16,8 +16,9 @@ vector<vector<int>> Pawn::getMoves() {
 	if (!real_board->getPiece(row2, col2)) {
 		ans.push_back({row, col, row2, col2});
 	}
-	if (moveCnt == 0) {
-		ans.push_back({row, col, (row2 - row) * 2 + row, (col2 - col) * 2 + col});
+	int row3 = (row2 - row) * 2 + row, col3 = (col2 - col) * 2 + col;
+	if (moveCnt == 0 && !real_board->getPiece(row3, col3)) {
+		ans.push_back({row, col, row3, col3});
 	}
 	if (real_board->validPos(row2, col2 + 1)) {
 		auto piece = real_board->getPiece(row2, col2 + 1);

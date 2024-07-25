@@ -16,14 +16,14 @@ const vector<string> PLACEMENTS = {
 	"RNBKQBNR"
 };
 
-void ChessBoard1V1::updateStatus() {
+void ChessBoard1V1::updateState() {
 	vector<vector<int>> cur_moves, next_moves;
 	int color = getCurrentPlayer()->getColor();
 	for (auto piece : *this) {
 		auto new_moves = piece->getMoves();
 		if (piece->getColor() == color) {
 			for (auto &move : new_moves) {
-				if (!isMoveCheck(move)) {
+				if (!doesMoveSelfCheck(move)) {
 					cur_moves.push_back(move);
 				}
 			}
@@ -49,14 +49,14 @@ void ChessBoard1V1::updateStatus() {
 	}
 	if (check) {
 		if (cur_moves.empty()) {
-			status = CHECKMATE; 
+			state = CHECKMATE; 
 		} else {
-			status = CHECK;
+			state = CHECK;
 		}
 	} else if (cur_moves.empty()) {
-		status = STALEMATE;
+		state = STALEMATE;
 	} else {
-		status = NORMAL;
+		state = NORMAL;
 	}
 }
 

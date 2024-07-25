@@ -8,9 +8,9 @@ void ChessBoard::setPiece(int row, int col, shared_ptr<ChessPiece> piece) {
 	updated[row][col] = true;
 }
 
-ChessBoard::ChessBoard(shared_ptr<Xwindow> window, int player_cnt, int size, int status) :
+ChessBoard::ChessBoard(shared_ptr<Xwindow> window, int player_cnt, int size, int state) :
 	Displayable(window),
-	moveCnt(0), status(status),
+	moveCnt(0), state(state),
 	players(player_cnt),
 	cells(size),
 	pieces(size, vector<shared_ptr<ChessPiece>> (size)),
@@ -64,7 +64,7 @@ bool ChessBoard::setTurn(const string &color) {
 
 bool ChessBoard::hasValidSetup() {return 1;}
 
-bool ChessBoard::isMoveCheck(const vector<int> &move) {
+bool ChessBoard::doesMoveSelfCheck(const vector<int> &move) {
 	moveCnt--;
 	processMove(move, false);
 	bool ans = false;
@@ -117,7 +117,7 @@ bool ChessBoard::move(const string &from, const string &to, const string &promot
 			}
 		}
 	}
-	if (index == -1 || isMoveCheck(moves[index])) {
+	if (index == -1 || doesMoveSelfCheck(moves[index])) {
 		return false;
 	}
 	processMove(moves[index]);
@@ -128,7 +128,7 @@ shared_ptr<Player> ChessBoard::getCurrentPlayer() {
 	return players[moveCnt % players.size()];
 }
 
-bool ChessBoard::undo(bool statusUpdate) {
+bool ChessBoard::undo(bool stateUpdate) {
 	if (all_moves.empty()) {
 		return false;
 	}
@@ -143,13 +143,13 @@ bool ChessBoard::undo(bool statusUpdate) {
 	}
 	all_moves.pop();
 	moveCnt--;
-	if (statusUpdate) {
-		updateStatus();
+	if (stateUpdate) {
+		updateState();
 	}
 	return true;
 }
 
-void ChessBoard::processMove(const vector<int> &move, bool statusUpdate) {
+void ChessBoard::processMove(const vector<int> &move, bool stateUpdate) {
 	int sz = move.size();
 	for (int i = 0; i < sz; i += MOVE_SIZE) {
 		int a = move[i], b = move[i + 1], c = move[i + 2], d = move[i + 3];
@@ -160,8 +160,8 @@ void ChessBoard::processMove(const vector<int> &move, bool statusUpdate) {
 	}
 	all_moves.push(move);
 	moveCnt++;
-	if (statusUpdate) {
-		updateStatus();
+	if (stateUpdate) {
+		updateState();
 	}
 }
 
@@ -179,8 +179,8 @@ vector<int> ChessBoard::getLastMove() {
 	return all_moves.top();
 }
 
-int ChessBoard::getStatus() {
-	return status;
+int ChessBoard::getState() {
+	return state;
 }
 
 ChessBoard::Iterator::Iterator(shared_ptr<ChessBoard> board, int i, int j) :
