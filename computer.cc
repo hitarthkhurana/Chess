@@ -161,6 +161,21 @@ int negamax(shared_ptr<ChessBoard> board, int depth, int alpha, int beta, int co
     return maxEval;
 }
 
+vector<vector<int>> getAllMoves(shared_ptr<ChessBoard> board, int color) {
+    vector<vector<int>> all_moves;
+    for (const auto& piece : *board) {
+        if (piece->getColor() == color) {
+            auto new_moves = piece->getMoves();
+            for (auto &move : new_moves) {
+                if (!board->doesMoveSelfCheck(move)) {
+                    all_moves.push_back(move);
+                }
+            }
+        }
+    }
+    return all_moves;
+}
+
 vector<int> Computer::getNextMove() {
 	vector<int> move;
 	auto real_board = board.lock();
