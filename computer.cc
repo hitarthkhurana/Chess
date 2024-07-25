@@ -1,6 +1,14 @@
 #include <set>
 #include "computer.h"
 #include "chessboard1v1.h"
+#include "chesspiece.h"
+#include "rook.h"
+#include "king.h"
+#include "queen.h"
+#include "bishop.h"
+#include "pawn.h"
+#include "knight.h"
+#include "player.h"
 
 Computer::Computer(shared_ptr<ChessBoard> board, int color, int level) :
 	Player(board, color), level(level) {}
