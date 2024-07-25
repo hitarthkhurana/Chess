@@ -19,14 +19,6 @@ int Computer::getRandom(int low, int high) {
 
 const int INF = 1000000; // A large constant value for practical purposes
 
-Computer::Computer(shared_ptr<ChessBoard> board, int color, int level) :
-    Player(board, color), level(level) {}
-
-int Computer::getRandom(int low, int high) {
-    random_device rd;
-    return (rd() - rd.min()) % (high - low + 1) + low;
-}
-
 const int P = 100, N = 320, B = 330, R = 500, Q = 900, K = 20000;
 
 // Array representation for point-square tables (evaluation matrices)
@@ -114,7 +106,6 @@ int getPieceSquareValue(shared_ptr<ChessPiece> piece, int row, int col) {
 
     if (piece->getColor() == Player::BLACK) {
         row = 7 - row;
-        col = 7 - col;
     }
 
     if (dynamic_pointer_cast<Pawn>(piece))
@@ -135,30 +126,12 @@ int getPieceSquareValue(shared_ptr<ChessPiece> piece, int row, int col) {
 
 int evaluateBoard(shared_ptr<ChessBoard> board) {
     int score = 0;
-    for (auto& piece : *board) {
-        int row = piece->getRow();
-        int col = piece->getCol();
+    for (const auto& piece : *board) {
+        int row = piece->row;
+        int col = piece->col;
         score += getPieceValue(piece) + getPieceSquareValue(piece, row, col);
     }
     return score;
-}
-
-int negamax(shared_ptr<ChessBoard> board, int depth, int alpha, int beta, int color) {
-    if (depth == 0) {
-        return color * evaluateBoard(board);
-    }
-
-    int maxEval = -INF;
-    auto moves = board->getAllMoves(color);
-    for (const auto& move : moves) {
-        board->processMove(move);
-        int eval = -negamax(board, depth - 1, -beta, -alpha, -color);
-        board->undo();
-        maxEval = max(maxEval, eval);
-        alpha = max(alpha, eval);
-        if (alpha >= beta) break;
-    }
-    return maxEval;
 }
 
 vector<vector<int>> getAllMoves(shared_ptr<ChessBoard> board, int color) {
@@ -174,6 +147,24 @@ vector<vector<int>> getAllMoves(shared_ptr<ChessBoard> board, int color) {
         }
     }
     return all_moves;
+}
+
+int negamax(shared_ptr<ChessBoard> board, int depth, int alpha, int beta, int color) {
+    if (depth == 0) {
+        return color * evaluateBoard(board);
+    }
+
+    int maxEval = -INF;
+    auto moves = getAllMoves(board, color);
+    for (const auto& move : moves) {
+        board->processMove(move);
+        int eval = -negamax(board, depth - 1, -beta, -alpha, -color);
+        board->undo();
+        maxEval = max(maxEval, eval);
+        alpha = max(alpha, eval);
+        if (alpha >= beta) break;
+    }
+    return maxEval;
 }
 
 vector<int> Computer::getNextMove() {
@@ -201,7 +192,7 @@ vector<int> Computer::getNextMove() {
 		vector<int> bestMove;
 	    	int maxEval = -INF;
 	    	auto real_board = board.lock();
-	    	auto moves = real_board->getAllMoves(color);
+	    	auto moves = getAllMoves(real_board, color);
 	
 		for (const auto& move : moves) {
 			real_board->processMove(move);
