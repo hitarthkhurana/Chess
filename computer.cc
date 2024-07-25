@@ -19,7 +19,6 @@ int Computer::getRandom(int low, int high) {
 
 const int P = 100, N = 320, B = 330, R = 500, Q = 900, K = 20000;
 
-// Array representation for point-square tables (evaluation matrices)
 const int pawn_table[8][8] = {
     { 0,  0,  0,  0,  0,  0,  0,  0},
     {50, 50, 50, 50, 50, 50, 50, 50},
@@ -89,7 +88,6 @@ const int king_table[8][8] = {
 int getPieceValue(shared_ptr<ChessPiece> piece) {
     if (!piece) return 0;
 
-    // Use dynamic casting to infer the type and return appropriate values
     if (dynamic_pointer_cast<Pawn>(piece)) return P;
     if (dynamic_pointer_cast<Knight>(piece)) return N;
     if (dynamic_pointer_cast<Bishop>(piece)) return B;
