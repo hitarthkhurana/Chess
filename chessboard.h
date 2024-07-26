@@ -27,14 +27,14 @@ protected:
 	vector<vector<bool>> updated; // Cells that have been updated since last display
 
 	// Store moves and removed pieces in a stack for undoing
-	stack<Move> all_moves;
-	stack<shared_ptr<ChessPiece>> removed_pieces;
+	stack<Move> allMoves;
+	stack<shared_ptr<ChessPiece>> removedPieces;
 
 	void setPiece(int row, int col, shared_ptr<ChessPiece> piece);
 	virtual void updateState() = 0;
 	
 public:
-	ChessBoard(shared_ptr<Xwindow> window, int player_cnt, int size, int state);
+	ChessBoard(shared_ptr<Xwindow> window, int playerCnt, int size, int state);
 	virtual void reset() = 0; // Reset the board to default configuration
 	virtual void clear() = 0; // Clear the board
 	virtual bool validPos(int row, int col) = 0;

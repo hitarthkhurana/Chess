@@ -8,10 +8,10 @@ void ChessBoard::setPiece(int row, int col, shared_ptr<ChessPiece> piece) {
 	updated[row][col] = true;
 }
 
-ChessBoard::ChessBoard(shared_ptr<Xwindow> window, int player_cnt, int size, int state) :
+ChessBoard::ChessBoard(shared_ptr<Xwindow> window, int playerCnt, int size, int state) :
 	Displayable(window),
 	moveCnt(0), state(state),
-	players(player_cnt),
+	players(playerCnt),
 	cells(size),
 	pieces(size, vector<shared_ptr<ChessPiece>> (size)),
 	updated(size, vector<bool> (size, true)) {
@@ -107,26 +107,29 @@ shared_ptr<Player> ChessBoard::getCurrentPlayer() const {
 
 bool ChessBoard::undo(bool stateUpdate) {
 	// Undo te last move by retracing the steps made
-	if (all_moves.empty()) {
+	if (allMoves.empty()) {
 		return false;
 	}
-	auto &move = all_moves.top();
+	auto &move = allMoves.top();
 	int r1 = move.r1, c1 = move.c1, r2 = move.r2, c2 = move.c2;
-	if (move.promotion != Move::NONE) {
-		pieces[r2][c2] = removed_pieces.top();
-		removed_pieces.pop();
+	if (move.enPassant) {
+		setPiece(r1, c2, removedPieces.top());
+		removedPieces.pop();
+	} else if (move.promotion != Move::NONE) {
+		pieces[r2][c2] = removedPieces.top();
+		removedPieces.pop();
 	} else if (move.castle) {
 		int r3 = move.r3, c3 = move.c3, r4 = move.r4, c4 = move.c4;
 		setPiece(r3, c3, pieces[r4][c4]);
 		pieces[r3][c3]->setPos(r3, c3, true);
-		setPiece(r4, c4, removed_pieces.top());
-		removed_pieces.pop();
+		setPiece(r4, c4, removedPieces.top());
+		removedPieces.pop();
 	}
 	setPiece(r1, c1, pieces[r2][c2]);
 	pieces[r1][c1]->setPos(r1, c1, true);
-	setPiece(r2, c2, removed_pieces.top());
-	removed_pieces.pop();
-	all_moves.pop();
+	setPiece(r2, c2, removedPieces.top());
+	removedPieces.pop();
+	allMoves.pop();
 	moveCnt--;
 	if (stateUpdate) {
 		updateState();
@@ -137,22 +140,25 @@ bool ChessBoard::undo(bool stateUpdate) {
 void ChessBoard::processMove(const Move &move, bool stateUpdate) {
 	// Make the requested move, along with castling and pawn promotion if applicable
 	int r1 = move.r1, c1 = move.c1, r2 = move.r2, c2 = move.c2;
-	removed_pieces.push(pieces[r2][c2]);
+	removedPieces.push(pieces[r2][c2]);
 	setPiece(r2, c2, pieces[r1][c1]);
 	pieces[r2][c2]->setPos(r2, c2);
 	setPiece(r1, c1, shared_ptr<ChessPiece>());
 	if (move.castle) {
 		int r3 = move.r3, c3 = move.c3, r4 = move.r4, c4 = move.c4;
-		removed_pieces.push(pieces[r4][c4]);
+		removedPieces.push(pieces[r4][c4]);
 		setPiece(r4, c4, pieces[r3][c3]);
 		pieces[r4][c4]->setPos(r4, c4);
 		setPiece(r3, c3, shared_ptr<ChessPiece>());
 	} else if (move.promotion != Move::NONE) {
-		removed_pieces.push(pieces[r2][c2]);
+		removedPieces.push(pieces[r2][c2]);
 		pieces[r2][c2] = ChessPiece::fromPromotion(move.promotion, shared_from_this(),
-			r2, c2, removed_pieces.top()->getColor());
+			r2, c2, removedPieces.top()->getColor());
+	} else if (move.enPassant) {
+		removedPieces.push(pieces[r1][c2]);
+		setPiece(r1, c2, shared_ptr<ChessPiece>());
 	}
-	all_moves.push(move);
+	allMoves.push(move);
 	moveCnt++;
 	if (stateUpdate) {
 		updateState();
@@ -171,7 +177,7 @@ void ChessBoard::makeComputerMove() {
 }
 
 Move ChessBoard::getLastMove() const {
-	return all_moves.top();
+	return allMoves.top();
 }
 
 int ChessBoard::getState() const {

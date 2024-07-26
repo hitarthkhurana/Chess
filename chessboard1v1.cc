@@ -94,11 +94,11 @@ void ChessBoard1V1::reset() {
 			);
 		}
 	}
-	while (!removed_pieces.empty()) {
-		removed_pieces.pop();
+	while (!removedPieces.empty()) {
+		removedPieces.pop();
 	}
-	while (!all_moves.empty()) {
-		all_moves.pop();
+	while (!allMoves.empty()) {
+		allMoves.pop();
 	}
 	state = NORMAL;
 	moveCnt = 0;
