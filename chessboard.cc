@@ -21,7 +21,7 @@ ChessBoard::ChessBoard(shared_ptr<Xwindow> window, int player_cnt, int size, int
 	}
 }
 
-shared_ptr<ChessPiece> ChessBoard::getPiece(int row, int col) {
+shared_ptr<ChessPiece> ChessBoard::getPiece(int row, int col) const {
 	return pieces[row][col];
 }
 
@@ -29,7 +29,7 @@ void ChessBoard::setPlayer(int index, shared_ptr<Player> player) {
 	players[index - 1] = player;
 }
 
-shared_ptr<Player> ChessBoard::getPlayer(int index) {
+shared_ptr<Player> ChessBoard::getPlayer(int index) const {
 	return players[index - 1];
 }
 
@@ -97,7 +97,7 @@ int ChessBoard::tryMove(int r1, int c1, int r2, int c2, int promotion) {
 	return NONE;
 }
 
-shared_ptr<Player> ChessBoard::getCurrentPlayer() {
+shared_ptr<Player> ChessBoard::getCurrentPlayer() const {
 	return players[moveCnt % players.size()];
 }
 
@@ -163,11 +163,11 @@ void ChessBoard::makeComputerMove() {
 	}
 }
 
-Move ChessBoard::getLastMove() {
+Move ChessBoard::getLastMove() const {
 	return all_moves.top();
 }
 
-int ChessBoard::getState() {
+int ChessBoard::getState() const {
 	return state;
 }
 
@@ -189,11 +189,11 @@ ChessBoard::Iterator& ChessBoard::Iterator::operator++() {
 	return *this;
 }
 
-shared_ptr<ChessPiece> ChessBoard::Iterator::operator*() {
+shared_ptr<ChessPiece> ChessBoard::Iterator::operator*() const {
 	return board->pieces[i][j];
 }
 
-bool ChessBoard::Iterator::operator==(const Iterator &other) {
+bool ChessBoard::Iterator::operator==(const Iterator &other) const {
 	return board == other.board && i == other.i && j == other.j;
 }
 

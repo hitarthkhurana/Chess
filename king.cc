@@ -9,7 +9,7 @@ const vector<pair<int, int>> CASTLE_DIRS = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
 King::King(shared_ptr<ChessBoard> board, int row, int col, int color) :
 	ChessPiece(board, row, col, color, WHITE_CHAR, BLACK_CHAR), moveCnt(0) {}
 
-vector<Move> King::getMoves() {
+vector<Move> King::getMoves() const {
 	vector<Move> ans = ChessPiece::offsetMoves(OFFSETS);
 	auto real_board = board.lock();
 	if (moveCnt == 0) {
@@ -40,6 +40,6 @@ void King::setPos(int row, int col, bool undo) {
 	moveCnt += undo ? -1 : 1;
 }
 
-bool King::hasMoved() {
+bool King::hasMoved() const {
 	return moveCnt != 0;
 }

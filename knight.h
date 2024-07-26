@@ -12,7 +12,7 @@ class Knight : public ChessPiece {
 public:
 	static const char WHITE_CHAR = 'N', BLACK_CHAR = 'n';
 	Knight(shared_ptr<ChessBoard>, int row, int col, int color);
-	vector<Move> getMoves() override;
+	vector<Move> getMoves() const override;
 };
 
 #endif

@@ -10,8 +10,6 @@ class ChessBoard;
 class ChessCell : public Displayable {
 private:
 	weak_ptr<ChessBoard> board;
-	bool highlighted;
-	std::pair<int, int> chessPos;
 	int row, col, color, size;
 	
 public:

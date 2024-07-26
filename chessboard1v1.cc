@@ -154,6 +154,7 @@ bool ChessBoard1V1::validPos(int row, int col) {
 }
 
 bool ChessBoard1V1::hasValidSetup() {
+	init();
 	bool white_king = false, black_king = false;
 	updateState();
 	if (state == CHECK || state == CHECKMATE) {
@@ -185,6 +186,6 @@ bool ChessBoard1V1::hasValidSetup() {
 	return white_king && black_king;
 }
 
-pair<int, int> ChessBoard1V1::getCoords(int row, int col) {
+pair<int, int> ChessBoard1V1::getCoords(int row, int col) const {
 	return {col * CELL_SIZE, (SIZE - row - 1) * CELL_SIZE};
 }

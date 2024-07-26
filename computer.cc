@@ -220,7 +220,7 @@ Move Computer::getNextMove() {
             }
         }
     }
-    vector<Move> preferred_moves;
+    vector<Move> preferred_moves, extra_moves;
     if (level >= 2) {
         for (auto &move : moves) {
             if (real_board->getPiece(move.r2, move.c2)) { // capture
@@ -237,10 +237,7 @@ Move Computer::getNextMove() {
             }
             // avoid capture
             if (level == 3) {
-                if (!other_reach.count({move.r1, move.c1})) {
-                    real_board->undo();
-                    continue;
-                }
+				bool extra = !other_reach.count({move.r1, move.c1});
                 vector<Move> other_moves;
                 for (auto piece : *real_board) {
                     if (piece->getColor() != color) {
@@ -256,12 +253,15 @@ Move Computer::getNextMove() {
                     }
                 }
                 if (good) {
-                    preferred_moves.push_back(move);
+					(extra ? extra_moves : preferred_moves).push_back(move);
                 }
             }
             real_board->undo();
         }
     }
+	if (preferred_moves.empty()) {
+		preferred_moves = extra_moves;
+	}
     if (!preferred_moves.empty()) {
         moves = preferred_moves;
     }

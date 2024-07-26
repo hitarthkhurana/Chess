@@ -15,9 +15,9 @@ private:
 public:
 	static const char WHITE_CHAR = 'R', BLACK_CHAR = 'r';
 	Rook(shared_ptr<ChessBoard>, int row, int col, int color);
-	vector<Move> getMoves() override;
+	vector<Move> getMoves() const override;
 	void setPos(int row, int col, bool undo = false) override;
-	bool hasMoved();
+	bool hasMoved() const;
 };
 
 #endif

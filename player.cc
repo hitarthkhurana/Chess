@@ -15,6 +15,6 @@ shared_ptr<Player> Player::fromString(const string &s, shared_ptr<ChessBoard> bo
 Player::Player(shared_ptr<ChessBoard> board, int color) :
 	color(color), board(board) {}
 
-bool Player::getColor() {
+bool Player::getColor() const {
 	return color;
 }

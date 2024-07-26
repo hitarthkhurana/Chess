@@ -20,7 +20,7 @@ public:
 	};
 
 	Player(shared_ptr<ChessBoard> board, int color);
-	bool getColor();
+	bool getColor() const;
 };
 
 #endif

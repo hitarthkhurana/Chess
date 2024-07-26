@@ -27,7 +27,7 @@ public:
     void resign();
     void checkBoardState();
     void processMove(const string& from, const string& to, const string &promotion);
-    void printLastMove();
+    void printLastMove() const;
     void makeComputerMoves();
     void enterSetupMode();
     void placePiece(const string& piece, const string& pos);
@@ -35,8 +35,8 @@ public:
     void setTurn(const string& color);
     void doneSetup();
 	void undoMove();
-	void printScore();
-	void printHelp();
+	void printScore() const;
+	void printHelp() const;
     bool processCommand(const string& command);
 };
 

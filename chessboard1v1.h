@@ -21,7 +21,7 @@ public:
 	void print() override;
 	bool validPos(int row, int col) override;
 	bool hasValidSetup() override;
-	pair<int, int> getCoords(int row, int col) override;
+	pair<int, int> getCoords(int row, int col) const override;
 
 	enum State {
 		NORMAL = 0, CHECK, CHECKMATE, STALEMATE

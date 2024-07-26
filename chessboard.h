@@ -35,22 +35,22 @@ public:
 	virtual void reset() = 0;
 	virtual void clear() = 0;
 	virtual bool validPos(int row, int col) = 0;
-	shared_ptr<ChessPiece> getPiece(int row, int col);
+	shared_ptr<ChessPiece> getPiece(int row, int col) const;
 	void setPlayer(int index, shared_ptr<Player> player);
-	shared_ptr<Player> getPlayer(int index);
+	shared_ptr<Player> getPlayer(int index) const;
 	void placePiece(shared_ptr<ChessPiece> piece, int row, int col);
 	void removePiece(int row, int col);
 	void setTurn(int color);
 	virtual bool hasValidSetup() = 0;
 	bool doesMoveSelfCheck(const Move &move);
 	int tryMove(int r1, int c1, int r2, int c2, int promotion);
-	shared_ptr<Player> getCurrentPlayer();
+	shared_ptr<Player> getCurrentPlayer() const;
 	bool undo(bool stateUpdate = true);
-	virtual pair<int, int> getCoords(int row, int col) = 0;
+	virtual pair<int, int> getCoords(int row, int col) const = 0;
 	void processMove(const Move &move, bool stateUpdate = true);
 	void makeComputerMove();
-	Move getLastMove();
-	int getState();
+	Move getLastMove() const;
+	int getState() const;
 
 	enum MoveError {
 		NONE = 0, BAD_TURN, SELF_CHECK, BAD_PROMOTION, OTHER
@@ -65,8 +65,8 @@ public:
 	
 	public:
 		Iterator& operator++();
-		shared_ptr<ChessPiece> operator*();
-		bool operator==(const Iterator &other);
+		shared_ptr<ChessPiece> operator*() const;
+		bool operator==(const Iterator &other) const;
 	};
 
 	Iterator begin();

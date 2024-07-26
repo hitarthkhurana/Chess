@@ -82,7 +82,7 @@ void GameManager::checkBoardState() {
 	}
 }
 
-void GameManager::printLastMove() { 
+void GameManager::printLastMove() const { 
 	auto move = board->getLastMove();
 	cout << endl << "Moved from ";
 	cout << static_cast<char>(move.c1 + COL_START);
@@ -272,13 +272,13 @@ void GameManager::undoMove() {
 	}
 }
 
-void GameManager::printScore() {
+void GameManager::printScore() const {
 	cout << "Final score:" << endl;
 	cout << "White: " << whiteWins << endl;
 	cout << "Black: " << blackWins << endl;
 }
 
-void GameManager::printHelp() {
+void GameManager::printHelp() const {
 	cout << "Available commands:" << endl;
 	if (setupMode) {
 		cout << "  + PIECE POS -- adds the piece PIECE to position POS" << endl;

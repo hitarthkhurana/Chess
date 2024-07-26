@@ -76,7 +76,7 @@ ChessPiece::ChessPiece(shared_ptr<ChessBoard> board, int row, int col, int color
 	Displayable(board->getWindow()), board(board), row(row), col(col),
 	color(color), white_char(white_char), black_char(black_char) {}
 
-vector<Move> ChessPiece::offsetMoves(const vector<pair<int, int>> &offsets) {
+vector<Move> ChessPiece::offsetMoves(const vector<pair<int, int>> &offsets) const {
 	vector<Move> ans;
 	auto real_board = board.lock();
 	for (auto [a, b] : offsets) {
@@ -91,7 +91,7 @@ vector<Move> ChessPiece::offsetMoves(const vector<pair<int, int>> &offsets) {
 	return ans;
 }
 
-vector<Move> ChessPiece::dirMoves(const vector<pair<int, int>> &dirs) {
+vector<Move> ChessPiece::dirMoves(const vector<pair<int, int>> &dirs) const {
 	vector<Move> ans;
 	auto real_board = board.lock();
 	for (auto [a, b] : dirs) {
@@ -116,6 +116,14 @@ void ChessPiece::setPos(int row, int col, bool undo) {
 	this->col = col;
 }
 
+void ChessPiece::print() {
+	if (color == Player::WHITE) {
+		cout << white_char;
+	} else {
+		cout << black_char;
+	}
+}
+
 void ChessPiece::display() {
 	string filename = ASSETS_DIR;
 	filename += (row + col) % 2 ? LIGHT_PREFIX : DARK_PREFIX;
@@ -125,18 +133,10 @@ void ChessPiece::display() {
 	window->drawImage(x, y, filename);
 }
 
-void ChessPiece::print() {
-	if (color == Player::WHITE) {
-		cout << white_char;
-	} else {
-		cout << black_char;
-	}
-}
-
-int ChessPiece::getColor() {
+int ChessPiece::getColor() const {
 	return color;
 }
 
-pair<int, int> ChessPiece::getPos() {
+pair<int, int> ChessPiece::getPos() const {
 	return {row, col};
 }

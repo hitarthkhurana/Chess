@@ -4,7 +4,7 @@
 Pawn::Pawn(shared_ptr<ChessBoard> board, int row, int col, int color) :
 	ChessPiece(board, row, col, color, WHITE_CHAR, BLACK_CHAR), moveCnt(0) {}
 
-vector<Move> Pawn::getMoves() {
+vector<Move> Pawn::getMoves() const {
 	int add = color == Player::WHITE ? 1 : -1;
 	auto real_board = board.lock();
 	if (!real_board->validPos(row + add, col)) {
