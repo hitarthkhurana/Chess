@@ -33,32 +33,12 @@ shared_ptr<Player> ChessBoard::getPlayer(int index) {
 	return players[index - 1];
 }
 
-bool ChessBoard::placePiece(const string &piece, const string &pos) {
-	if (pos.size() != POS_SIZE) {
-		return false;
-	}
-	int row = pos[1] - ROW_START, col = pos[0] - COL_START;
-	if (!validPos(row, col)) {
-		return false;
-	}
-	auto piece2 = ChessPiece::fromString(piece, shared_from_this(), row, col);
-	if (!piece2) {
-		return false;
-	}
-	setPiece(row, col, piece2);
-	return true;
+void ChessBoard::placePiece(shared_ptr<ChessPiece> piece, int row, int col) {
+	setPiece(row, col, piece);
 }
 
-bool ChessBoard::removePiece(const string &pos) {
-	if (pos.size() != POS_SIZE) {
-		return false;
-	}
-	int r = pos[1] - ROW_START, c = pos[0] - COL_START;
-	if (!validPos(r, c)) {
-		return false;
-	}
-	setPiece(r, c, shared_ptr<ChessPiece>());
-	return true;
+void ChessBoard::removePiece(int row, int col) {
+	setPiece(row, col, shared_ptr<ChessPiece>());
 }
 
 void ChessBoard::setTurn(int color) {
@@ -67,7 +47,7 @@ void ChessBoard::setTurn(int color) {
 	}
 }
 
-bool ChessBoard::doesMoveSelfCheck(const vector<int> &move) {
+bool ChessBoard::doesMoveSelfCheck(const Move &move) {
 	moveCnt--;
 	processMove(move, false);
 	bool ans = false;
@@ -76,15 +56,9 @@ bool ChessBoard::doesMoveSelfCheck(const vector<int> &move) {
 		if (piece->getColor() != color) {
 			auto moves = piece->getMoves();
 			for (auto &cur_move : moves) {
-				int sz = cur_move.size();
-				for (int i = 0; i < sz; i += MOVE_SIZE) {
-					auto piece2 = pieces[cur_move[i + 2]][cur_move[i + 3]];
-					if (auto king = dynamic_pointer_cast<King>(piece2); king && king->getColor() == color) {
-						ans = true;
-						break;
-					}
-				}
-				if (ans) {
+				auto piece2 = pieces[cur_move.r2][cur_move.c2];
+				if (auto king = dynamic_pointer_cast<King>(piece2); king && king->getColor() == color) {
+					ans = true;
 					break;
 				}
 			}
@@ -98,36 +72,29 @@ bool ChessBoard::doesMoveSelfCheck(const vector<int> &move) {
 	return ans;
 }
 
-bool ChessBoard::move(const string &from, const string &to, const string &promotion) {
-	if (from.size() != POS_SIZE || to.size() != POS_SIZE) {
-		return false;
-	}
-	// need to account for promotion
-	int r1 = from[1] - ROW_START, c1 = from[0] - COL_START, r2 = to[1] - ROW_START, c2 = to[0] - COL_START;
-	if (!validPos(r1, c1) || !validPos(r2, c2) || !pieces[r1][c1]) {
-		return false;
-	}
+int ChessBoard::tryMove(int r1, int c1, int r2, int c2, int promotion) {
 	if (pieces[r1][c1]->getColor() != getCurrentPlayer()->getColor()) {
-		return false;
+		return BAD_TURN;
 	}
 	auto moves = pieces[r1][c1]->getMoves();
-	int sz = moves.size(), sz2, index = -1;
-	for (int i = 0; i < sz && index == -1; i++) {
+	int index = -1, sz = moves.size();
+	for (int i = 0; i < sz; i++) {
 		auto &move = moves[i];
-		sz2 = move.size();
-		for (int j = 0; j < sz2; j += MOVE_SIZE) {
-			int a = move[j], b = move[j + 1], c = move[j + 2], d = move[j + 3];
-			if (a == r1 && b == c1 && c == r2 && d == c2) {
-				index = i;
-				break;
+		if (move.r1 == r1 && move.c1 == c1 && move.r2 == r2 && move.c2 == c2) {
+			if (move.promotion != promotion) {
+				return BAD_PROMOTION;
 			}
+			index = i;
+			break;
 		}
 	}
-	if (index == -1 || doesMoveSelfCheck(moves[index])) {
-		return false;
+	if (index == -1) {
+		return OTHER;
+	} else if (doesMoveSelfCheck(moves[index])) {
+		return SELF_CHECK;
 	}
 	processMove(moves[index]);
-	return true;
+	return NONE;
 }
 
 shared_ptr<Player> ChessBoard::getCurrentPlayer() {
@@ -139,14 +106,21 @@ bool ChessBoard::undo(bool stateUpdate) {
 		return false;
 	}
 	auto &move = all_moves.top();
-	int sz = move.size();
-	for (int i = sz - MOVE_SIZE; i >= 0; i -= MOVE_SIZE) {
-		int a = move[i], b = move[i + 1], c = move[i + 2], d = move[i + 3];
-		setPiece(a, b, pieces[c][d]);
-		pieces[a][b]->setPos(a, b, true);
-		setPiece(c, d, removed_pieces.top());
+	int r1 = move.r1, c1 = move.c1, r2 = move.r2, c2 = move.c2;
+	if (move.promotion != Move::NONE) {
+		pieces[r2][c2] = removed_pieces.top();
+		removed_pieces.pop();
+	} else if (move.castle) {
+		int r3 = move.r3, c3 = move.c3, r4 = move.r4, c4 = move.c4;
+		setPiece(r3, c3, pieces[r4][c4]);
+		pieces[r3][c3]->setPos(r3, c3, true);
+		setPiece(r4, c4, removed_pieces.top());
 		removed_pieces.pop();
 	}
+	setPiece(r1, c1, pieces[r2][c2]);
+	pieces[r1][c1]->setPos(r1, c1, true);
+	setPiece(r2, c2, removed_pieces.top());
+	removed_pieces.pop();
 	all_moves.pop();
 	moveCnt--;
 	if (stateUpdate) {
@@ -155,14 +129,22 @@ bool ChessBoard::undo(bool stateUpdate) {
 	return true;
 }
 
-void ChessBoard::processMove(const vector<int> &move, bool stateUpdate) {
-	int sz = move.size();
-	for (int i = 0; i < sz; i += MOVE_SIZE) {
-		int a = move[i], b = move[i + 1], c = move[i + 2], d = move[i + 3];
-		removed_pieces.push(pieces[c][d]);
-		setPiece(c, d, pieces[a][b]);
-		pieces[c][d]->setPos(c, d);
-		setPiece(a, b, shared_ptr<ChessPiece>());
+void ChessBoard::processMove(const Move &move, bool stateUpdate) {
+	int r1 = move.r1, c1 = move.c1, r2 = move.r2, c2 = move.c2;
+	removed_pieces.push(pieces[r2][c2]);
+	setPiece(r2, c2, pieces[r1][c1]);
+	pieces[r2][c2]->setPos(r2, c2);
+	setPiece(r1, c1, shared_ptr<ChessPiece>());
+	if (move.castle) {
+		int r3 = move.r3, c3 = move.c3, r4 = move.r4, c4 = move.c4;
+		removed_pieces.push(pieces[r4][c4]);
+		setPiece(r4, c4, pieces[r3][c3]);
+		pieces[r4][c4]->setPos(r4, c4);
+		setPiece(r3, c3, shared_ptr<ChessPiece>());
+	} else if (move.promotion != Move::NONE) {
+		removed_pieces.push(pieces[r2][c2]);
+		pieces[r2][c2] = ChessPiece::fromPromotion(move.promotion, shared_from_this(),
+			r2, c2, removed_pieces.top()->getColor());
 	}
 	all_moves.push(move);
 	moveCnt++;
@@ -181,7 +163,7 @@ void ChessBoard::makeComputerMove() {
 	}
 }
 
-vector<int> ChessBoard::getLastMove() {
+Move ChessBoard::getLastMove() {
 	return all_moves.top();
 }
 

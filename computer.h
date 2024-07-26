@@ -13,7 +13,7 @@ private:
 
 public:
 	Computer(shared_ptr<ChessBoard> board, int color, int level);
-	vector<int> getNextMove();
+	Move getNextMove();
 };
 
 #endif

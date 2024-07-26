@@ -4,8 +4,9 @@
 #include "gamemanager.h"
 #include "chessboard1v1.h"
 #include "computer.h"
+#include "move.h"
 
-const int WINDOW_SIZE = 720;
+const int WINDOW_SIZE = 720, POS_SIZE = 2;
 const int WHITE_TURN = 1, BLACK_TURN = 2;
 const set<string> VALID_PLAYERS = {"human", "computer1", "computer2", "computer3", "computer4", "computer5"};
 
@@ -31,6 +32,8 @@ GameManager::GameManager() :
 void GameManager::startGame(const string& whitePlayer, const string& blackPlayer) {
 	if (gameActive) {
 		cout << "A game is already in progress." << endl;
+	} else if (setupMode) {
+		cout << "You must leave setup mode to start a game." << endl;
 	} else if (!VALID_PLAYERS.count(whitePlayer) || !VALID_PLAYERS.count(blackPlayer)) {
 		cout << "Both player must be specified as either 'human' or 'computer[1-5]'." << endl;
 	} else {
@@ -81,32 +84,43 @@ void GameManager::checkBoardState() {
 
 void GameManager::printLastMove() { 
 	auto move = board->getLastMove();
-	int sz = move.size();
-	cout << endl << "Moved ";
-	for (int i = 0; i < sz; i += MOVE_SIZE) {
-		if (i != 0) {
-			cout << " and ";
-		}
-		cout << "from ";
-		cout << static_cast<char>(move[i + 1] + COL_START) << (move[i + 0] + 1);
+	cout << endl << "Moved from ";
+	cout << static_cast<char>(move.c1 + COL_START);
+	cout << static_cast<char>(move.r1 + ROW_START);
+	cout << " to ";
+	cout << static_cast<char>(move.c2 + COL_START);
+	cout << static_cast<char>(move.r2 + ROW_START);
+	if (move.castle) {
+		cout << " and from ";
+		cout << static_cast<char>(move.c3 + COL_START);
+		cout << static_cast<char>(move.r3 + ROW_START);
 		cout << " to ";
-		cout << static_cast<char>(move[i + 3] + COL_START) << (move[i + 2] + 1);
+		cout << static_cast<char>(move.c4 + COL_START);
+		cout << static_cast<char>(move.r4 + ROW_START);
+	} else if (move.promotion != Move::NONE) {
+		cout << " and promoted pawn to ";
+		if (move.promotion == Move::QUEEN) {
+			cout << "queen";
+		} else if (move.promotion == Move::ROOK) {
+			cout << "rook";
+		} else if (move.promotion == Move::BISHOP) {
+			cout << "bishop";
+		} else {
+			cout << "knight";
+		}
 	}
-	// board->...promotion...();
 	cout << "." << endl;
 }
 
 void GameManager::makeComputerMoves() {
 	while (gameActive) {
-		auto computer = dynamic_pointer_cast<Computer>(board->getCurrentPlayer());
-		if (!computer) {
+		if (!dynamic_pointer_cast<Computer>(board->getCurrentPlayer())) {
 			break;
 		}
-		cout << endl;
+		cout << endl << "Computer's turn..." << endl << endl;
 		board->makeComputerMove();
 		board->display();
 		board->print();
-		cout << endl;
 		printLastMove();
 		checkBoardState();
 	}
@@ -114,17 +128,49 @@ void GameManager::makeComputerMoves() {
 
 void GameManager::processMove(const string& from, const string& to, const string& promotion) {
 	if (gameActive) {
-		bool valid = board->move(from, to, promotion);
+		int row1 = from[1] - ROW_START, col1 = from[0] - COL_START;
+		int row2 = to[1] - ROW_START, col2 = to[0] - COL_START;
+		if (from.size() != POS_SIZE || !board->validPos(row1, col1)) {
+			cout << "Invalid starting position." << endl;
+			return;
+		} else if (to.size() != POS_SIZE || !board->validPos(row2, col2)) {
+			cout << "Invalid ending position." << endl;
+			return;
+		}
 
-		if (valid) {
+		int promotion2;
+		if (promotion.empty()) {
+			promotion2 = Move::NONE;
+		} else if (promotion == "q") {
+			promotion2 = Move::QUEEN;
+		} else if (promotion == "r") {
+			promotion2 = Move::ROOK;
+		} else if (promotion == "b") {
+			promotion2 = Move::BISHOP;
+		} else if (promotion == "n") {
+			promotion2 = Move::KNIGHT;
+		} else {
+			cout << "Invalid promotion." << endl;
+			return;
+		}
+
+		int result = board->tryMove(row1, col1, row2, col2, promotion2);
+
+		if (result == ChessBoard::BAD_TURN) {
+			cout << "Please move your own piece." << endl;
+		} else if (result == ChessBoard::SELF_CHECK) {
+			cout << "You cannot move yourself into check." << endl;
+		} else if (result == ChessBoard::BAD_PROMOTION) {
+			cout << "Invalid promotion." << endl;
+		} else if (result == ChessBoard::OTHER) {
+			cout << "Invalid Move" << endl;
+		} else {
 			board->print();
 			board->display();
 			humanMoveCnt++;
 			printLastMove();
 			checkBoardState();
 			makeComputerMoves();
-		} else {
-			cout << "Invalid move." << endl;
 		}
 	} else {
 		cout << "Please start a game to perform a move." << endl;
@@ -136,32 +182,41 @@ void GameManager::enterSetupMode() {
         cout << "Cannot enter setup mode during an active game." << endl;
     } else {
         setupMode = true;
+		board->clear();
+		board->display();
         cout << "Entered setup mode." << endl;
     }
 }
 
-void GameManager::placePiece(const string& piece, const string& position) {
+void GameManager::placePiece(const string& piece, const string& pos) {
     if (setupMode) {
-        if (board->placePiece(piece, position)) {
+		int row = pos[1] - ROW_START, col = pos[0] - COL_START;
+		auto piece2 = ChessPiece::fromString(piece, board, row, col);
+		if (pos.size() != POS_SIZE || !board->validPos(row, col)) {
+			cout << "Invalid position." << endl;
+		} else if (!piece2) {
+			cout << "Invalid piece." << endl;
+		} else {
+			board->placePiece(piece2, row, col);
 			board->print();
 			board->display();
-			cout << "Placed " << piece << " at " << position << "." << endl;
-		} else {
-			cout << "Invalid piece or position." << endl;
+			cout << endl << "Placed " << piece << " at " << pos << "." << endl;
 		}
     } else {
         cout << "Not currently in setup mode." << endl;
     }
 }
 
-void GameManager::removePiece(const string& position) {
+void GameManager::removePiece(const string& pos) {
     if (setupMode) {
-		if (board->removePiece(position)) {
+		int row = pos[1] - ROW_START, col = pos[0] - COL_START;
+		if (pos.size() != POS_SIZE || !board->validPos(row, col)) {
+			cout << "Invalid position." << endl;
+		} else {
+			board->removePiece(row, col);
 			board->print();
 			board->display();
-			cout << "Removed piece from " << position << "." << endl;
-		} else {
-			cout << "Invalid position." << endl;
+			cout << endl << "Removed piece from " << pos << "." << endl;
 		}
     } else {
         cout << "Not currently in setup mode." << endl;
@@ -206,14 +261,14 @@ void GameManager::undoMove() {
 	} else if (humanMoveCnt == 0) {
 		cout << "No moves to undo." << endl;
 	} else {
+		board->undo();
 		while (dynamic_pointer_cast<Computer>(board->getCurrentPlayer())) {
 			board->undo();
 		}
-		board->undo();
 		board->print();
 		board->display();
 		humanMoveCnt--;
-		cout << "Undid last move." << endl;
+		cout << endl << "Undo successful." << endl;
 	}
 }
 
@@ -242,14 +297,14 @@ void GameManager::printHelp() {
 	}
 }
 
-void GameManager::processCommand(const string& command) {
+bool GameManager::processCommand(const string& command) {
     istringstream iss(command);
     string cmd;
     iss >> cmd;
 	cmd = tolower(cmd);
 
 	if (cmd.empty()) {
-		return;
+		return true;
 	} else if (cmd == "game") {
         string whitePlayer, blackPlayer;
         iss >> whitePlayer >> blackPlayer;
@@ -259,7 +314,7 @@ void GameManager::processCommand(const string& command) {
     } else if (cmd == "move") {
         string from, to, promotion;
 		iss >> from >> to >> promotion;
-        processMove(tolower(from), tolower(to), promotion);
+        processMove(tolower(from), tolower(to), tolower(promotion));
     } else if (cmd == "setup") {
         enterSetupMode();
     } else if (cmd == "+") {
@@ -283,10 +338,10 @@ void GameManager::processCommand(const string& command) {
 	} else if (cmd == "help") {
 		printHelp();
 	} else if (cmd == "quit") {
-		cout << "Bye!" << endl;
-		exit(0);
+		return false;
     } else {
         cout << "Unknown command." << endl;
 		cout << "Enter 'help' for a full list of commands." << endl;
     }
+	return true;
 }

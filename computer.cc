@@ -9,6 +9,7 @@
 #include "pawn.h"
 #include "knight.h"
 #include "player.h"
+#include "move.h"
 
 Computer::Computer(shared_ptr<ChessBoard> board, int color, int level) :
     Player(board, color), level(level) {}
@@ -126,16 +127,15 @@ int evaluateBoard(shared_ptr<ChessBoard> board) {
     int score = 0;
 	int color = board->getCurrentPlayer()->getColor();
     for (const auto& piece : *board) {
-        int row = piece->row;
-        int col = piece->col;
+		auto [row, col] = piece->getPos();
         int cur = getPieceSquareValue(piece, row, col);
 		score += piece->getColor() == color ? cur : -cur;
     }
     return score;
 }
 
-vector<vector<int>> getAllMoves(shared_ptr<ChessBoard> board, int color) {
-    vector<vector<int>> all_moves;
+vector<Move> getAllMoves(shared_ptr<ChessBoard> board, int color) {
+    vector<Move> all_moves;
     for (const auto& piece : *board) {
         if (piece->getColor() == color) {
             auto new_moves = piece->getMoves();
@@ -149,8 +149,8 @@ vector<vector<int>> getAllMoves(shared_ptr<ChessBoard> board, int color) {
     return all_moves;
 }
 
-int getMoveValue(shared_ptr<ChessBoard> board, const vector<int> &move) {
-	auto piece = board->getPiece(move[2], move[3]);
+int getMoveValue(shared_ptr<ChessBoard> board, const Move &move) {
+	auto piece = board->getPiece(move.r2, move.c2);
 	int ans = piece && piece->getColor() != board->getCurrentPlayer()->getColor() ? getPieceValue(piece) : 0;
 	board->processMove(move);
 	if (board->getState() == ChessBoard1V1::CHECK) {
@@ -180,9 +180,9 @@ int negamax(shared_ptr<ChessBoard> board, int depth, int alpha, int beta, int co
     return maxEval;
 }
 
-vector<int> Computer::getNextMove() {
+Move Computer::getNextMove() {
     if (level >= 4) {
-        vector<int> bestMove;
+        Move bestMove;
 		int maxEval = -INF;
 		auto real_board = board.lock();
 		auto moves = getAllMoves(real_board, color);
@@ -200,14 +200,14 @@ vector<int> Computer::getNextMove() {
         return bestMove;
     }
 
-    vector<int> move;
+    Move move;
     auto real_board = board.lock();
-    vector<vector<int>> moves;
+    vector<Move> moves;
     set<pair<int, int>> other_reach;
     int count = 0;
     for (auto piece : *real_board) {
         count++;
-        vector<vector<int>> new_moves = piece->getMoves();
+        vector<Move> new_moves = piece->getMoves();
         if (piece->getColor() == color) {
             for (auto &move : new_moves) {
                 if (!real_board->doesMoveSelfCheck(move)) {
@@ -216,14 +216,14 @@ vector<int> Computer::getNextMove() {
             }
         } else {
             for (auto &move : new_moves) {
-                other_reach.insert({move[2], move[3]});
+                other_reach.insert({move.r2, move.c2});
             }
         }
     }
-    vector<vector<int>> preferred_moves;
+    vector<Move> preferred_moves;
     if (level >= 2) {
         for (auto &move : moves) {
-            if (real_board->getPiece(move[2], move[3])) { // capture
+            if (real_board->getPiece(move.r2, move.c2)) { // capture
                 preferred_moves.push_back(move);
                 continue;
             }
@@ -237,11 +237,11 @@ vector<int> Computer::getNextMove() {
             }
             // avoid capture
             if (level == 3) {
-                if (!other_reach.count({move[0], move[1]})) {
+                if (!other_reach.count({move.r1, move.c1})) {
                     real_board->undo();
                     continue;
                 }
-                vector<vector<int>> other_moves;
+                vector<Move> other_moves;
                 for (auto piece : *real_board) {
                     if (piece->getColor() != color) {
                         auto cur_moves = piece->getMoves();
@@ -250,7 +250,7 @@ vector<int> Computer::getNextMove() {
                 }
                 bool good = true;
                 for (auto &move2 : other_moves) {
-                    if (move2[2] == move[2] && move2[3] == move[3]) {
+                    if (move2.r2 == move.r2 && move2.c2 == move.c2) {
                         good = false;
                         break;
                     }

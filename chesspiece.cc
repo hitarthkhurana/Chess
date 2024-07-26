@@ -46,12 +46,38 @@ shared_ptr<ChessPiece> ChessPiece::fromString(const string &s, shared_ptr<ChessB
 	}
 }
 
+shared_ptr<ChessPiece> ChessPiece::fromPromotion(int promotion, shared_ptr<ChessBoard> board, int row, int col, int color) {
+	shared_ptr<ChessPiece> ans;
+	switch (promotion) {
+		case Move::QUEEN:
+			ans = make_shared<Queen>(board, row, col, color);
+			break;
+		case Move::ROOK:
+			ans = make_shared<Rook>(board, row, col, color);
+			break;
+		case Move::BISHOP:
+			ans = make_shared<Bishop>(board, row, col, color);
+			break;
+		case Move::KNIGHT:
+			ans = make_shared<Knight>(board, row, col, color);
+			break;
+		default:
+			ans = shared_ptr<ChessPiece>();
+			break;
+	}
+	// Simulate a move to ensure non-zero move count
+	if (ans) {
+		ans->setPos(row, col);
+	}
+	return ans;
+}
+
 ChessPiece::ChessPiece(shared_ptr<ChessBoard> board, int row, int col, int color, char white_char, char black_char) :
 	Displayable(board->getWindow()), board(board), row(row), col(col),
 	color(color), white_char(white_char), black_char(black_char) {}
 
-vector<vector<int>> ChessPiece::offsetMoves(const vector<pair<int, int>> &offsets) {
-	vector<vector<int>> ans;
+vector<Move> ChessPiece::offsetMoves(const vector<pair<int, int>> &offsets) {
+	vector<Move> ans;
 	auto real_board = board.lock();
 	for (auto [a, b] : offsets) {
 		int row2 = row + a, col2 = col + b;
@@ -65,8 +91,8 @@ vector<vector<int>> ChessPiece::offsetMoves(const vector<pair<int, int>> &offset
 	return ans;
 }
 
-vector<vector<int>> ChessPiece::dirMoves(const vector<pair<int, int>> &dirs) {
-	vector<vector<int>> ans;
+vector<Move> ChessPiece::dirMoves(const vector<pair<int, int>> &dirs) {
+	vector<Move> ans;
 	auto real_board = board.lock();
 	for (auto [a, b] : dirs) {
 		int row2 = row + a, col2 = col + b;
@@ -109,4 +135,8 @@ void ChessPiece::print() {
 
 int ChessPiece::getColor() {
 	return color;
+}
+
+pair<int, int> ChessPiece::getPos() {
+	return {row, col};
 }

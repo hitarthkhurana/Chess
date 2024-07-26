@@ -15,7 +15,7 @@ private:
 public:
 	static const char WHITE_CHAR = 'K', BLACK_CHAR = 'k';
 	King(shared_ptr<ChessBoard>, int row, int col, int color);
-	vector<vector<int>> getMoves() override;
+	vector<Move> getMoves() override;
 	void setPos(int row, int col, bool undo = false) override;
 	bool hasMoved();
 };

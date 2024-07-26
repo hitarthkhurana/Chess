@@ -18,7 +18,7 @@ const vector<string> PLACEMENTS = {
 };
 
 void ChessBoard1V1::updateState() {
-	vector<vector<int>> cur_moves, next_moves;
+	vector<Move> cur_moves, next_moves;
 	int color = getCurrentPlayer()->getColor();
 	for (auto piece : *this) {
 		auto new_moves = piece->getMoves();
@@ -35,16 +35,9 @@ void ChessBoard1V1::updateState() {
 	bool check = false;
 	shared_ptr<King> king;
 	for (auto &move : next_moves) {
-		int sz = move.size();
-		for (int i = 0; i < sz; i += MOVE_SIZE) {
-			int a = move[i + 2], b = move[i + 3];
-			king = dynamic_pointer_cast<King>(pieces[a][b]);
-			if (king) {
-				check = true;
-				break;
-			}
-		}
-		if (check) {
+		king = dynamic_pointer_cast<King>(pieces[move.r2][move.c2]);
+		if (king) {
+			check = true;
 			break;
 		}
 	}
@@ -105,7 +98,18 @@ void ChessBoard1V1::reset() {
 	moveCnt = 0;
 }
 
-// move methods to ChessBoard for 4 player
+void ChessBoard1V1::clear() {
+	for (int i = 0; i < SIZE; i++) {
+		for (int j = 0; j < SIZE; j++) {
+			if (!pieces[i][j]) {
+				continue;
+			}
+			updated[i][j] = true;
+			pieces[i][j] = shared_ptr<ChessPiece>();
+		}
+	}
+}
+
 void ChessBoard1V1::display() {
 	init();
 	for (int i = 0; i < SIZE; i++) {
@@ -151,6 +155,7 @@ bool ChessBoard1V1::validPos(int row, int col) {
 
 bool ChessBoard1V1::hasValidSetup() {
 	bool white_king = false, black_king = false;
+	updateState();
 	if (state == CHECK || state == CHECKMATE) {
 		return false;
 	}
@@ -172,7 +177,7 @@ bool ChessBoard1V1::hasValidSetup() {
 					return false;
 				}
 				has_king = true;
-			 } else if (i == 0 || (i == SIZE - 1 && dynamic_pointer_cast<Pawn>(pieces[i][j]))) {
+			 } else if ((i == 0 || i == SIZE - 1) && dynamic_pointer_cast<Pawn>(pieces[i][j])) {
 				 return false;
 			 }
 		}

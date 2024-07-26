@@ -15,10 +15,13 @@ int main() {
 	cout << PROMPT;
 	while (getline(cin, line)) {
 		cout << endl;
-		gm.processCommand(line);
+		if (!gm.processCommand(line)) {
+			break;
+		}
 		cout << endl << PROMPT;
 	}
 
 	cout << endl << endl;
 	gm.printScore();
+	cout << endl << "Bye!" << endl;
 }

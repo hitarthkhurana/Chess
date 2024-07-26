@@ -30,14 +30,14 @@ public:
     void printLastMove();
     void makeComputerMoves();
     void enterSetupMode();
-    void placePiece(const string& piece, const string& position);
-    void removePiece(const string& position);
+    void placePiece(const string& piece, const string& pos);
+    void removePiece(const string& pos);
     void setTurn(const string& color);
     void doneSetup();
 	void undoMove();
 	void printScore();
 	void printHelp();
-    void processCommand(const string& command);
+    bool processCommand(const string& command);
 };
 
 #endif // GAMEMANAGER_H

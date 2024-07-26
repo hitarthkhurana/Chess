@@ -16,6 +16,7 @@ public:
 	ChessBoard1V1(shared_ptr<Xwindow> window);
 	void init(); // cannot run "shared_from_this()" in constructor
 	void reset() override;
+	void clear() override;
 	void display() override;
 	void print() override;
 	bool validPos(int row, int col) override;

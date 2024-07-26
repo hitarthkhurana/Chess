@@ -12,7 +12,7 @@ class Queen : public ChessPiece {
 public:
 	static const char WHITE_CHAR = 'Q', BLACK_CHAR = 'q';
 	Queen(shared_ptr<ChessBoard>, int row, int col, int color);
-	vector<vector<int>> getMoves() override;
+	vector<Move> getMoves() override;
 };
 
 #endif
