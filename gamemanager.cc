@@ -7,7 +7,7 @@
 
 const int WINDOW_SIZE = 720;
 const int WHITE_TURN = 1, BLACK_TURN = 2;
-const set<string> VALID_PLAYERS = {"human", "computer1", "computer2", "computer3", "computer4"};
+const set<string> VALID_PLAYERS = {"human", "computer1", "computer2", "computer3", "computer4", "computer5"};
 
 string tolower(const string& s) {
 	string ans = s;
@@ -32,7 +32,7 @@ void GameManager::startGame(const string& whitePlayer, const string& blackPlayer
 	if (gameActive) {
 		cout << "A game is already in progress." << endl;
 	} else if (!VALID_PLAYERS.count(whitePlayer) || !VALID_PLAYERS.count(blackPlayer)) {
-		cout << "Both player must be specified as either 'human' or 'computer[1-4]'." << endl;
+		cout << "Both player must be specified as either 'human' or 'computer[1-5]'." << endl;
 	} else {
 		board->setPlayer(WHITE_TURN, Player::fromString(whitePlayer, board, Player::WHITE));
 		board->setPlayer(BLACK_TURN, Player::fromString(blackPlayer, board, Player::BLACK));
@@ -97,7 +97,7 @@ void GameManager::printLastMove() {
 }
 
 void GameManager::makeComputerMoves() {
-	while (true) {
+	while (gameActive) {
 		auto computer = dynamic_pointer_cast<Computer>(board->getCurrentPlayer());
 		if (!computer) {
 			break;
