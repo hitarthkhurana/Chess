@@ -9,16 +9,19 @@ class ChessBoard;
 
 class Player {
 protected:
-	int color;
-	weak_ptr<ChessBoard> board;
+	int color;                  // Color of player's pieces
+	weak_ptr<ChessBoard> board; // Keep track of the board
 
 public:
-	virtual ~Player() = default;
+	// Create a Player from a string
 	static shared_ptr<Player> fromString(const string &s, shared_ptr<ChessBoard> board, int color);
+
+	// Allowed colors for the player
 	enum Colors {
-		BLACK = 0, WHITE, BLUE, GREEN, YELLOW, RED
+		BLACK = 0, WHITE
 	};
 
+	virtual ~Player() = default; // Make sure the class is polymorphic
 	Player(shared_ptr<ChessBoard> board, int color);
 	bool getColor() const;
 };

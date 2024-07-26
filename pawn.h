@@ -10,7 +10,7 @@ using namespace std;
 
 class Pawn : public ChessPiece {
 private:
-	int moveCnt = 0;
+	int moveCnt = 0; // Move count to determine whether pawn can move two forward
 
 public:
 	static const char WHITE_CHAR = 'P', BLACK_CHAR = 'p';

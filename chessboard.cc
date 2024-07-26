@@ -43,11 +43,13 @@ void ChessBoard::removePiece(int row, int col) {
 
 void ChessBoard::setTurn(int color) {
 	if (color != getCurrentPlayer()->getColor()) {
-		swap(players[0], players[1]);
+		moveCnt++;
 	}
 }
 
 bool ChessBoard::doesMoveSelfCheck(const Move &move) {
+	// Try the move and see whether the king is in the path of the opposing
+	// player's pieces
 	moveCnt--;
 	processMove(move, false);
 	bool ans = false;
@@ -73,6 +75,8 @@ bool ChessBoard::doesMoveSelfCheck(const Move &move) {
 }
 
 int ChessBoard::tryMove(int r1, int c1, int r2, int c2, int promotion) {
+	// Attempt the given move and see if it is valid. Return an appropriate error
+	// if invalid.
 	if (pieces[r1][c1]->getColor() != getCurrentPlayer()->getColor()) {
 		return BAD_TURN;
 	}
@@ -102,6 +106,7 @@ shared_ptr<Player> ChessBoard::getCurrentPlayer() const {
 }
 
 bool ChessBoard::undo(bool stateUpdate) {
+	// Undo te last move by retracing the steps made
 	if (all_moves.empty()) {
 		return false;
 	}
@@ -130,6 +135,7 @@ bool ChessBoard::undo(bool stateUpdate) {
 }
 
 void ChessBoard::processMove(const Move &move, bool stateUpdate) {
+	// Make the requested move, along with castling and pawn promotion if applicable
 	int r1 = move.r1, c1 = move.c1, r2 = move.r2, c2 = move.c2;
 	removed_pieces.push(pieces[r2][c2]);
 	setPiece(r2, c2, pieces[r1][c1]);
@@ -154,6 +160,7 @@ void ChessBoard::processMove(const Move &move, bool stateUpdate) {
 }
 
 void ChessBoard::makeComputerMove() {
+	// Make the computer's move, if it is the computer's turn
 	int sz = players.size();
 	shared_ptr<Player> cur_player = players[moveCnt % sz];
 	shared_ptr<Computer> computer = dynamic_pointer_cast<Computer>(cur_player);
@@ -175,6 +182,7 @@ ChessBoard::Iterator::Iterator(shared_ptr<ChessBoard> board, int i, int j) :
 	board(board), i(i), j(j) {}
 
 ChessBoard::Iterator& ChessBoard::Iterator::operator++() {
+	// Increment until a piece is reached in the board
 	int sz = board->pieces.size();
 	while (true) {
 		j++;
@@ -194,6 +202,7 @@ shared_ptr<ChessPiece> ChessBoard::Iterator::operator*() const {
 }
 
 bool ChessBoard::Iterator::operator==(const Iterator &other) const {
+	// Determine equality from the boards and positions
 	return board == other.board && i == other.i && j == other.j;
 }
 

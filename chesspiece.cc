@@ -13,6 +13,7 @@ const string DARK_PREFIX = "d";
 const vector<string> COLOR_PREFIXES = {"b", "w"};
 
 shared_ptr<ChessPiece> ChessPiece::fromString(const string &s, shared_ptr<ChessBoard> board, int row, int col) {
+	// Match the character in s to the appropriate type of ChessPiece
 	if (s.size() != 1) {
 		return shared_ptr<ChessPiece>();
 	}
@@ -47,6 +48,7 @@ shared_ptr<ChessPiece> ChessPiece::fromString(const string &s, shared_ptr<ChessB
 }
 
 shared_ptr<ChessPiece> ChessPiece::fromPromotion(int promotion, shared_ptr<ChessBoard> board, int row, int col, int color) {
+	// Match the given promotion to the appropriate type of ChessPiece
 	shared_ptr<ChessPiece> ans;
 	switch (promotion) {
 		case Move::QUEEN:
@@ -77,6 +79,7 @@ ChessPiece::ChessPiece(shared_ptr<ChessBoard> board, int row, int col, int color
 	color(color), white_char(white_char), black_char(black_char) {}
 
 vector<Move> ChessPiece::offsetMoves(const vector<pair<int, int>> &offsets) const {
+	// Return a list of all valid moves using offsets from the current position
 	vector<Move> ans;
 	auto real_board = board.lock();
 	for (auto [a, b] : offsets) {
@@ -92,6 +95,7 @@ vector<Move> ChessPiece::offsetMoves(const vector<pair<int, int>> &offsets) cons
 }
 
 vector<Move> ChessPiece::dirMoves(const vector<pair<int, int>> &dirs) const {
+	// Return a list of all valid moves using directions from the current position
 	vector<Move> ans;
 	auto real_board = board.lock();
 	for (auto [a, b] : dirs) {
@@ -117,6 +121,7 @@ void ChessPiece::setPos(int row, int col, bool undo) {
 }
 
 void ChessPiece::print() {
+	// Print a character depending on the player color
 	if (color == Player::WHITE) {
 		cout << white_char;
 	} else {
@@ -125,6 +130,7 @@ void ChessPiece::print() {
 }
 
 void ChessPiece::display() {
+	// Generate the appropriate file name, and display the image from it
 	string filename = ASSETS_DIR;
 	filename += (row + col) % 2 ? LIGHT_PREFIX : DARK_PREFIX;
 	filename += COLOR_PREFIXES[color];

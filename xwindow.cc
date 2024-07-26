@@ -74,12 +74,15 @@ void Xwindow::drawString(int x, int y, string msg) {
 }
 
 void Xwindow::drawImage(int x, int y, std::string file) {
+	// Read the image details from the requested file
 	ifstream input(file.c_str(), ios::binary);
 	int width, height, screen = DefaultScreen(d), sz = sizeof(int);
 	input.read(reinterpret_cast<char*>(&width), sz);
 	input.read(reinterpret_cast<char*>(&height), sz);
 	char *png = new char[width * height * sz];
 	input.read(png, width * height * sz);
+
+	// Draw the image to the requested position
 	XImage* xim = XCreateImage(
 		d, DefaultVisual(d,screen), DefaultDepth(d,screen),
 		ZPixmap, 0, reinterpret_cast<char*>(png), width, height, 32, 0

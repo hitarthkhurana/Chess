@@ -11,15 +11,11 @@
 #include "player.h"
 #include "move.h"
 
-Computer::Computer(shared_ptr<ChessBoard> board, int color, int level) :
-    Player(board, color), level(level) {}
+const int BOARD_SIZE = 8;
 
-int Computer::getRandom(int low, int high) {
-    return (rd() - rd.min()) % (high - low + 1) + low;
-}
-
-const int INF = 1000000; // A large constant value for practical purposes
-const int P = 100, N = 320, B = 330, R = 500, Q = 900, K = 20000;
+// Large arbitrary number and piece value constants
+const int INF = 1000000;
+const int P = 100, N = 320, B = 330, R = 500, Q = 900, K = 20000, C = 600, CM = 5000;
 
 // Array representation for point-square tables (evaluation matrices)
 const int pawn_table[8][8] = {
@@ -89,7 +85,7 @@ const int king_table[8][8] = {
 };
 
 int getPieceValue(shared_ptr<ChessPiece> piece) {
-    // Use dynamic casting to infer the type and return appropriate values
+    // Use dynamic casting to infer the type and return piece's value
     if (dynamic_pointer_cast<Pawn>(piece)) return P;
     else if (dynamic_pointer_cast<Knight>(piece)) return N;
     else if (dynamic_pointer_cast<Bishop>(piece)) return B;
@@ -100,11 +96,12 @@ int getPieceValue(shared_ptr<ChessPiece> piece) {
 }
 
 int getPieceSquareValue(shared_ptr<ChessPiece> piece, int row, int col) {
+	// Determine the piece's value based on its position and the evaluation matrices
     if (!piece) return 0;
     int score = 0;
 
     if (piece->getColor() == Player::BLACK) {
-        row = 7 - row;
+        row = BOARD_SIZE - row - 1;
     }
 
     if (dynamic_pointer_cast<Pawn>(piece))
@@ -124,6 +121,8 @@ int getPieceSquareValue(shared_ptr<ChessPiece> piece, int row, int col) {
 }
 
 int evaluateBoard(shared_ptr<ChessBoard> board) {
+	// Return a value for the current board based on the current player's
+	// perspective and the position and existence of the pieces
     int score = 0;
 	int color = board->getCurrentPlayer()->getColor();
     for (const auto& piece : *board) {
@@ -135,6 +134,7 @@ int evaluateBoard(shared_ptr<ChessBoard> board) {
 }
 
 vector<Move> getAllMoves(shared_ptr<ChessBoard> board, int color) {
+	// Return all valid moves that the current player can make
     vector<Move> all_moves;
     for (const auto& piece : *board) {
         if (piece->getColor() == color) {
@@ -150,18 +150,22 @@ vector<Move> getAllMoves(shared_ptr<ChessBoard> board, int color) {
 }
 
 int getMoveValue(shared_ptr<ChessBoard> board, const Move &move) {
+	// Return a value based on the quality of the given move
 	auto piece = board->getPiece(move.r2, move.c2);
 	int ans = piece && piece->getColor() != board->getCurrentPlayer()->getColor() ? getPieceValue(piece) : 0;
 	board->processMove(move);
 	if (board->getState() == ChessBoard1V1::CHECK) {
-		ans += 1000;
+		ans += C;
 	} else if (board->getState() == ChessBoard1V1::CHECKMATE) {
-		ans += 10000;
+		ans += CM;
 	}
 	return ans;
 }
 
 int negamax(shared_ptr<ChessBoard> board, int depth, int alpha, int beta, int color) {
+	// Run the minimax algorithm, with alpha-beta pruning, to determine a good
+	// move for the current player to play. Use both board and move evaluations.
+	
     if (depth == 0) {
         return evaluateBoard(board);
     }
@@ -180,7 +184,15 @@ int negamax(shared_ptr<ChessBoard> board, int depth, int alpha, int beta, int co
     return maxEval;
 }
 
+Computer::Computer(shared_ptr<ChessBoard> board, int color, int level) :
+    Player(board, color), level(level) {}
+
+int Computer::getRandom(int low, int high) {
+    return (rd() - rd.min()) % (high - low + 1) + low;
+}
+
 Move Computer::getNextMove() {
+	// If the level is 4 or higher, use the minimax algorithm
     if (level >= 4) {
         Move bestMove;
 		int maxEval = -INF;
@@ -200,7 +212,7 @@ Move Computer::getNextMove() {
         return bestMove;
     }
 
-    Move move;
+	// Determine the moves of the current and next player
     auto real_board = board.lock();
     vector<Move> moves;
     set<pair<int, int>> other_reach;
@@ -220,14 +232,18 @@ Move Computer::getNextMove() {
             }
         }
     }
+
+	// Iterate through the moves to see if the move is suitable
     vector<Move> preferred_moves, extra_moves;
     if (level >= 2) {
         for (auto &move : moves) {
-            if (real_board->getPiece(move.r2, move.c2)) { // capture
+			// Determine whether the move captures another piece
+            if (real_board->getPiece(move.r2, move.c2)) {
                 preferred_moves.push_back(move);
                 continue;
             }
-            // check/checkmate
+
+			// Determine whether the move causes a check/checkmate
             real_board->processMove(move);
             if (real_board->getState() == ChessBoard1V1::CHECK ||
                 real_board->getState() == ChessBoard1V1::CHECKMATE) {
@@ -235,7 +251,8 @@ Move Computer::getNextMove() {
                 real_board->undo();
                 continue;
             }
-            // avoid capture
+
+            // Determine whether the move avoids capture
             if (level == 3) {
 				bool extra = !other_reach.count({move.r1, move.c1});
                 vector<Move> other_moves;
@@ -259,12 +276,18 @@ Move Computer::getNextMove() {
             real_board->undo();
         }
     }
+
+	// Use list of moves that cannot be captured if there are no other preferred moves
 	if (preferred_moves.empty()) {
 		preferred_moves = extra_moves;
 	}
+
+	// Use preferred moves if not empty
     if (!preferred_moves.empty()) {
         moves = preferred_moves;
     }
+
+	// Return a random move from the suitable list of moves
     int sz = moves.size(), index = getRandom(0, sz - 1);
     return moves[index];
 }

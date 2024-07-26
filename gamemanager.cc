@@ -6,13 +6,15 @@
 #include "computer.h"
 #include "move.h"
 
+// Game constants
 const int WINDOW_SIZE = 720, POS_SIZE = 2;
 const int WHITE_TURN = 1, BLACK_TURN = 2;
 const set<string> VALID_PLAYERS = {"human", "computer1", "computer2", "computer3", "computer4", "computer5"};
 
 string tolower(const string& s) {
+	// Return s in lowercase
 	string ans = s;
-	for (char c : ans) {
+	for (char &c : ans) {
 		c = tolower(c);
 	}
 	return ans;
@@ -30,6 +32,7 @@ GameManager::GameManager() :
 }
 
 void GameManager::startGame(const string& whitePlayer, const string& blackPlayer) {
+	// Start the game if allowed
 	if (gameActive) {
 		cout << "A game is already in progress." << endl;
 	} else if (setupMode) {
@@ -49,6 +52,7 @@ void GameManager::startGame(const string& whitePlayer, const string& blackPlayer
 }
 
 void GameManager::resign() {
+	// Resign if a game is in progress and grant a win to the correct player
     if (gameActive) {
 		if (board->getCurrentPlayer()->getColor() == Player::BLACK) {
 			cout << "White wins!" << endl;
@@ -65,6 +69,7 @@ void GameManager::resign() {
 }
 
 void GameManager::checkBoardState() {
+	// Check the state of the board and act appropriately
 	int state = board->getState();
 	if (state == ChessBoard1V1::CHECK) {
 		if (board->getCurrentPlayer()->getColor() == Player::WHITE) {
@@ -83,6 +88,7 @@ void GameManager::checkBoardState() {
 }
 
 void GameManager::printLastMove() const { 
+	// Print the last move made
 	auto move = board->getLastMove();
 	cout << endl << "Moved from ";
 	cout << static_cast<char>(move.c1 + COL_START);
@@ -113,6 +119,7 @@ void GameManager::printLastMove() const {
 }
 
 void GameManager::makeComputerMoves() {
+	// Make computer moves until the game is over or it is a human's turn
 	while (gameActive) {
 		if (!dynamic_pointer_cast<Computer>(board->getCurrentPlayer())) {
 			break;
@@ -127,6 +134,7 @@ void GameManager::makeComputerMoves() {
 }
 
 void GameManager::processMove(const string& from, const string& to, const string& promotion) {
+	// Process the given move, and report an appropriate error if needed
 	if (gameActive) {
 		int row1 = from[1] - ROW_START, col1 = from[0] - COL_START;
 		int row2 = to[1] - ROW_START, col2 = to[0] - COL_START;
@@ -154,6 +162,7 @@ void GameManager::processMove(const string& from, const string& to, const string
 			return;
 		}
 
+		// Attempt the move
 		int result = board->tryMove(row1, col1, row2, col2, promotion2);
 
 		if (result == ChessBoard::BAD_TURN) {
@@ -178,6 +187,7 @@ void GameManager::processMove(const string& from, const string& to, const string
 }
 
 void GameManager::enterSetupMode() {
+	// Enter setup mode if allowed
     if (gameActive) {
         cout << "Cannot enter setup mode during an active game." << endl;
     } else {
@@ -189,6 +199,7 @@ void GameManager::enterSetupMode() {
 }
 
 void GameManager::placePiece(const string& piece, const string& pos) {
+	// Place the piece (in setup mode) if valid
     if (setupMode) {
 		int row = pos[1] - ROW_START, col = pos[0] - COL_START;
 		auto piece2 = ChessPiece::fromString(piece, board, row, col);
@@ -208,6 +219,7 @@ void GameManager::placePiece(const string& piece, const string& pos) {
 }
 
 void GameManager::removePiece(const string& pos) {
+	// Remove the piece (in setup mode) if valid
     if (setupMode) {
 		int row = pos[1] - ROW_START, col = pos[0] - COL_START;
 		if (pos.size() != POS_SIZE || !board->validPos(row, col)) {
@@ -224,6 +236,7 @@ void GameManager::removePiece(const string& pos) {
 }
 
 void GameManager::setTurn(const string& color) {
+	// Set the first turn to the requested player
     if (setupMode) {
 		if (color == "white") {
 			board->setTurn(Player::WHITE);
@@ -241,6 +254,7 @@ void GameManager::setTurn(const string& color) {
 }
 
 void GameManager::doneSetup() {
+	// Exit setup mode if a valid setup is recorded
     if (setupMode) {
         if (board->hasValidSetup()) {
             setupMode = false;
@@ -256,6 +270,7 @@ void GameManager::doneSetup() {
 }
 
 void GameManager::undoMove() {
+	// Undo moves until the human's last move is undone
 	if (!gameActive) {
 		cout << "No game in progress." << endl;
 	} else if (humanMoveCnt == 0) {
@@ -273,12 +288,14 @@ void GameManager::undoMove() {
 }
 
 void GameManager::printScore() const {
+	// Print the final score
 	cout << "Final score:" << endl;
 	cout << "White: " << whiteWins << endl;
 	cout << "Black: " << blackWins << endl;
 }
 
 void GameManager::printHelp() const {
+	// Print a list of available commands based on the context
 	cout << "Available commands:" << endl;
 	if (setupMode) {
 		cout << "  + PIECE POS -- adds the piece PIECE to position POS" << endl;
@@ -298,6 +315,7 @@ void GameManager::printHelp() const {
 }
 
 bool GameManager::processCommand(const string& command) {
+	// Process the command given, delegating to the appropriate function
     istringstream iss(command);
     string cmd;
     iss >> cmd;

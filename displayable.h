@@ -6,6 +6,7 @@
 
 using namespace std;
 
+// For objects that need to be displayed grapically and printed in text
 class Displayable {
 protected:
 	shared_ptr<Xwindow> window;

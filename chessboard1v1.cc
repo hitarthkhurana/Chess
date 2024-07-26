@@ -3,6 +3,7 @@
 #include "king.h"
 #include "pawn.h"
 
+// Standard chess board constants
 const int SIZE = 8;
 const int PLAYER_CNT = 2;
 const int CELL_SIZE = 90;
@@ -18,6 +19,7 @@ const vector<string> PLACEMENTS = {
 };
 
 void ChessBoard1V1::updateState() {
+	// Get the current and next moves
 	vector<Move> cur_moves, next_moves;
 	int color = getCurrentPlayer()->getColor();
 	for (auto piece : *this) {
@@ -32,6 +34,7 @@ void ChessBoard1V1::updateState() {
 			next_moves.insert(next_moves.end(), new_moves.begin(), new_moves.end());
 		}
 	}
+	// See if the king is in check
 	bool check = false;
 	shared_ptr<King> king;
 	for (auto &move : next_moves) {
@@ -41,6 +44,7 @@ void ChessBoard1V1::updateState() {
 			break;
 		}
 	}
+	// Determine the state of the board
 	if (check) {
 		if (cur_moves.empty()) {
 			state = CHECKMATE; 
@@ -58,6 +62,7 @@ ChessBoard1V1::ChessBoard1V1(shared_ptr<Xwindow> window) :
 	ChessBoard(window, PLAYER_CNT, SIZE, NORMAL), hasInit(false) {}
 
 void ChessBoard1V1::init() {
+	// Set the cells and pieces as needed
 	if (hasInit) {
 		return;
 	}
@@ -77,6 +82,7 @@ void ChessBoard1V1::init() {
 }
 
 void ChessBoard1V1::reset() {
+	// Return the board to its initial configuration
 	init();
 	for (int i = 0; i < SIZE; i++) {
 		for (int j = 0; j < SIZE; j++) {
@@ -99,6 +105,7 @@ void ChessBoard1V1::reset() {
 }
 
 void ChessBoard1V1::clear() {
+	// Clear the board of all its pieces
 	for (int i = 0; i < SIZE; i++) {
 		for (int j = 0; j < SIZE; j++) {
 			if (!pieces[i][j]) {
@@ -111,6 +118,7 @@ void ChessBoard1V1::clear() {
 }
 
 void ChessBoard1V1::display() {
+	// Display the board, cell by cell
 	init();
 	for (int i = 0; i < SIZE; i++) {
 		for (int j = 0; j < SIZE; j++) {
@@ -129,9 +137,12 @@ void ChessBoard1V1::display() {
 }
 
 void ChessBoard1V1::print() {
+	// Print the board, cell by cell, along with its axes
 	init();
 	for (int i = SIZE - 1; i >= 0; i--) {
+		// Print the left axis
 		cout << (i + 1) << " ";
+
 		for (int j = 0; j < SIZE; j++) {
 			if (pieces[i][j]) {
 				pieces[i][j]->print();
@@ -141,6 +152,7 @@ void ChessBoard1V1::print() {
 		}
 		cout << endl;
 	}
+	// Print the bottom axis
 	cout << endl << "  ";
 	for (int i = 0; i < SIZE; i++) {
 		cout << static_cast<char> (COL_START + i);
@@ -154,6 +166,7 @@ bool ChessBoard1V1::validPos(int row, int col) {
 }
 
 bool ChessBoard1V1::hasValidSetup() {
+	// Not a valid setup if either king is in check
 	init();
 	bool white_king = false, black_king = false;
 	updateState();
@@ -169,6 +182,7 @@ bool ChessBoard1V1::hasValidSetup() {
 	}
 	moveCnt--;
 	updateState();
+	// Ensure exactly one king for each color and no pawns in first or last row
 	for (int i = 0; i < SIZE; i++) {
 		for (int j = 0; j < SIZE; j++) {
 			auto king = dynamic_pointer_cast<King>(pieces[i][j]);

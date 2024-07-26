@@ -1,12 +1,14 @@
 #ifndef MOVE_H
 #define MOVE_H
 
+// Mutable data struct (like std::pair)
 struct Move {
 	int r1, c1, r2, c2; // Primary move positions
 	int r3, c3, r4, c4; // Castling positions
 	bool castle;        // Is castling?
 	int promotion;      // Pawn promotion
 
+	// Types of promotion
 	enum Promotion {
 		NONE = 0, QUEEN, ROOK, BISHOP, KNIGHT
 	};

@@ -15,8 +15,11 @@ using namespace std;
 
 class GameManager {
 private:
+	// Keep ownership of the board and window
     shared_ptr<Xwindow> window;
     shared_ptr<ChessBoard> board;
+
+	// Game attributes
     bool setupMode, gameActive;
 	int whiteWins, blackWins, humanMoveCnt;
 

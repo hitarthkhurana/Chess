@@ -23,6 +23,7 @@ public:
 	bool hasValidSetup() override;
 	pair<int, int> getCoords(int row, int col) const override;
 
+	// Represent the state of the board
 	enum State {
 		NORMAL = 0, CHECK, CHECKMATE, STALEMATE
 	};

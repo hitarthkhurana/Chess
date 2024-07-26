@@ -7,6 +7,7 @@ const string PROMPT = " >>> ";
 using namespace std;
 
 int main() {
+	// Process commands until there is no more, or the program is quit
 	cout << "Welcome to C++-Chess!" << endl;
 	cout << "Enter a command to continue." << endl;
 

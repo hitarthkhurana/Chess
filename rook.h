@@ -10,7 +10,7 @@ using namespace std;
 
 class Rook : public ChessPiece {
 private:
-	int moveCnt;
+	int moveCnt; // Move count to see if castling is allowed
 
 public:
 	static const char WHITE_CHAR = 'R', BLACK_CHAR = 'r';

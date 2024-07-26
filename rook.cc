@@ -14,6 +14,7 @@ vector<Move> Rook::getMoves() const {
 
 void Rook::setPos(int row, int col, bool undo) {
 	ChessPiece::setPos(row, col);
+	// Increase move count, but decrease instead for undo
 	moveCnt += undo ? -1 : 1;
 }
 

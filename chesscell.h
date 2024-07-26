@@ -9,13 +9,15 @@ class ChessBoard;
 
 class ChessCell : public Displayable {
 private:
-	weak_ptr<ChessBoard> board;
-	int row, col, color, size;
+	weak_ptr<ChessBoard> board; // Keep track of the board
+	int row, col, color, size;  // Chess cell attributes
 	
 public:
+	// Color of chess cell
 	enum Colors {
 		LIGHT = 0, DARK
 	};
+
 	ChessCell(shared_ptr<ChessBoard> board, int row, int col, int color, int size);
 	void display() override;
 	void print() override;

@@ -12,6 +12,8 @@ King::King(shared_ptr<ChessBoard> board, int row, int col, int color) :
 vector<Move> King::getMoves() const {
 	vector<Move> ans = ChessPiece::offsetMoves(OFFSETS);
 	auto real_board = board.lock();
+	// If the king has not moved, check in needed direction for a rook that can
+	// be castled with
 	if (moveCnt == 0) {
 		for (auto [a, b] : CASTLE_DIRS) {
 			int row2 = row + a, col2 = col + b;
@@ -37,6 +39,7 @@ vector<Move> King::getMoves() const {
 
 void King::setPos(int row, int col, bool undo) {
 	ChessPiece::setPos(row, col);
+	// Increase move count, but decrease instead for undo
 	moveCnt += undo ? -1 : 1;
 }
 
