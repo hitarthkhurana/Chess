@@ -4,8 +4,8 @@
 #include <cstdlib>
 #include <string>
 #include <unistd.h>
+#include <fstream>
 #include "xwindow.h"
-#include "image.h"
 
 using namespace std;
 
@@ -74,7 +74,16 @@ void Xwindow::drawString(int x, int y, string msg) {
 }
 
 void Xwindow::drawImage(int x, int y, std::string file) {
-	XImage* xim = loadImage(file.c_str(), d);
+	ifstream input(file.c_str(), ios::binary);
+	int width, height, screen = DefaultScreen(d);
+	input.read(reinterpret_cast<char*>(&width), 4);
+	input.read(reinterpret_cast<char*>(&height), 4);
+	char *png = new char[width * height * 4];
+	input.read(png, width * height * 4);
+	XImage* xim = XCreateImage(
+		d, DefaultVisual(d,screen), DefaultDepth(d,screen),
+		ZPixmap, 0, reinterpret_cast<char*>(png), width, height, 32, 0
+	);
 	XPutImage(d, w, gc, xim, 0, 0, x, y, xim->width, xim->height);
 	XDestroyImage(xim);
 }

@@ -11,7 +11,6 @@ const string ASSETS_DIR = "./assets/";
 const string LIGHT_PREFIX = "l";
 const string DARK_PREFIX = "d";
 const vector<string> COLOR_PREFIXES = {"b", "w"};
-const string IMAGE_EXTENSION = ".png";
 
 shared_ptr<ChessPiece> ChessPiece::fromString(const string &s, shared_ptr<ChessBoard> board, int row, int col) {
 	if (s.size() != 1) {
@@ -96,7 +95,6 @@ void ChessPiece::display() {
 	filename += (row + col) % 2 ? LIGHT_PREFIX : DARK_PREFIX;
 	filename += COLOR_PREFIXES[color];
 	filename += black_char;
-	filename += IMAGE_EXTENSION;
 	auto [x, y] = board.lock()->getCoords(row, col);
 	window->drawImage(x, y, filename);
 }
