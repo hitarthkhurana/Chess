@@ -172,7 +172,7 @@ void GameManager::processMove(const string& from, const string& to, const string
 		} else if (result == ChessBoard::BAD_PROMOTION) {
 			cout << "Invalid promotion." << endl;
 		} else if (result == ChessBoard::OTHER) {
-			cout << "Invalid Move" << endl;
+			cout << "Invalid move." << endl;
 		} else {
 			board->print();
 			board->display();

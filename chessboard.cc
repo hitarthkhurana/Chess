@@ -77,7 +77,9 @@ bool ChessBoard::doesMoveSelfCheck(const Move &move) {
 int ChessBoard::tryMove(int r1, int c1, int r2, int c2, int promotion) {
 	// Attempt the given move and see if it is valid. Return an appropriate error
 	// if invalid.
-	if (pieces[r1][c1]->getColor() != getCurrentPlayer()->getColor()) {
+	if (!pieces[r1][c1]) {
+		return OTHER;
+	} else if (pieces[r1][c1]->getColor() != getCurrentPlayer()->getColor()) {
 		return BAD_TURN;
 	}
 	auto moves = pieces[r1][c1]->getMoves();
