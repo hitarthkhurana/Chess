@@ -7,7 +7,7 @@
 
 class ChessBoard1V1 : public ChessBoard {
 private:
-	bool hasInit;
+	bool hasInit, displayed;
 
 protected:
 	void updateState() override;

@@ -59,7 +59,7 @@ void ChessBoard1V1::updateState() {
 }
 
 ChessBoard1V1::ChessBoard1V1(shared_ptr<Xwindow> window) :
-	ChessBoard(window, PLAYER_CNT, SIZE, NORMAL), hasInit(false) {}
+	ChessBoard(window, PLAYER_CNT, SIZE, NORMAL), hasInit(false), displayed(false) {}
 
 void ChessBoard1V1::init() {
 	// Set the cells and pieces as needed
@@ -86,12 +86,15 @@ void ChessBoard1V1::reset() {
 	init();
 	for (int i = 0; i < SIZE; i++) {
 		for (int j = 0; j < SIZE; j++) {
-			updated[i][j] = true;
-			pieces[i][j] = ChessPiece::fromString(
+			auto piece = ChessPiece::fromString(
 				string(1, PLACEMENTS[SIZE - i - 1][j]),
 				shared_from_this(),
 				i, j
 			);
+			if (!piece && !pieces[i][j]) {
+				continue;
+			}
+			pieces[i][j] = piece;
 		}
 	}
 	while (!removedPieces.empty()) {
@@ -111,7 +114,6 @@ void ChessBoard1V1::clear() {
 			if (!pieces[i][j]) {
 				continue;
 			}
-			updated[i][j] = true;
 			pieces[i][j] = shared_ptr<ChessPiece>();
 		}
 	}
@@ -122,10 +124,10 @@ void ChessBoard1V1::display() {
 	init();
 	for (int i = 0; i < SIZE; i++) {
 		for (int j = 0; j < SIZE; j++) {
-			if (!updated[i][j]) {
+			if (displayed && lastDisplayPieces[i][j] == pieces[i][j]) {
 				continue;
 			}
-			updated[i][j] = false;
+			lastDisplayPieces[i][j] = pieces[i][j];
 			if (cells[i][j]) {
 				cells[i][j]->display();
 				if (pieces[i][j]) {
@@ -134,6 +136,7 @@ void ChessBoard1V1::display() {
 			}
 		}
 	}
+	displayed = true;
 }
 
 void ChessBoard1V1::print() {

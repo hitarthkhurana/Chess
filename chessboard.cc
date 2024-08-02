@@ -3,18 +3,13 @@
 #include "computer.h"
 #include "king.h"
 
-void ChessBoard::setPiece(int row, int col, shared_ptr<ChessPiece> piece) {
-	pieces[row][col] = piece;
-	updated[row][col] = true;
-}
-
 ChessBoard::ChessBoard(shared_ptr<Xwindow> window, int playerCnt, int size, int state) :
 	Displayable(window),
 	moveCnt(0), state(state),
 	players(playerCnt),
 	cells(size),
 	pieces(size, vector<shared_ptr<ChessPiece>> (size)),
-	updated(size, vector<bool> (size, true)) {
+	lastDisplayPieces(size, vector<shared_ptr<ChessPiece>> (size)) {
 
 	for (int i = 0; i < size; i++) {
 		cells[i].resize(size);
@@ -34,11 +29,11 @@ shared_ptr<Player> ChessBoard::getPlayer(int index) const {
 }
 
 void ChessBoard::placePiece(shared_ptr<ChessPiece> piece, int row, int col) {
-	setPiece(row, col, piece);
+	pieces[row][col] = piece;
 }
 
 void ChessBoard::removePiece(int row, int col) {
-	setPiece(row, col, shared_ptr<ChessPiece>());
+	pieces[row][col] = shared_ptr<ChessPiece>();
 }
 
 void ChessBoard::setTurn(int color) {
@@ -71,6 +66,9 @@ bool ChessBoard::doesMoveSelfCheck(const Move &move) {
 	}
 	moveCnt++;
 	undo(false);
+	if (move.castle && !ans) {
+		return doesMoveSelfCheck(Move(move.r1, move.c1, (move.r1 + move.r2) / 2, (move.c1 + move.c2) / 2));
+	}
 	return ans;
 }
 
@@ -115,21 +113,21 @@ bool ChessBoard::undo(bool stateUpdate) {
 	auto &move = allMoves.top();
 	int r1 = move.r1, c1 = move.c1, r2 = move.r2, c2 = move.c2;
 	if (move.enPassant) {
-		setPiece(r1, c2, removedPieces.top());
+		pieces[r1][c2] = removedPieces.top();
 		removedPieces.pop();
 	} else if (move.promotion != Move::NONE) {
 		pieces[r2][c2] = removedPieces.top();
 		removedPieces.pop();
 	} else if (move.castle) {
 		int r3 = move.r3, c3 = move.c3, r4 = move.r4, c4 = move.c4;
-		setPiece(r3, c3, pieces[r4][c4]);
+		pieces[r3][c3] = pieces[r4][c4];
 		pieces[r3][c3]->setPos(r3, c3, true);
-		setPiece(r4, c4, removedPieces.top());
+		pieces[r4][c4] = removedPieces.top();
 		removedPieces.pop();
 	}
-	setPiece(r1, c1, pieces[r2][c2]);
+	pieces[r1][c1] = pieces[r2][c2];
 	pieces[r1][c1]->setPos(r1, c1, true);
-	setPiece(r2, c2, removedPieces.top());
+	pieces[r2][c2] = removedPieces.top();
 	removedPieces.pop();
 	allMoves.pop();
 	moveCnt--;
@@ -143,22 +141,22 @@ void ChessBoard::processMove(const Move &move, bool stateUpdate) {
 	// Make the requested move, along with castling and pawn promotion if applicable
 	int r1 = move.r1, c1 = move.c1, r2 = move.r2, c2 = move.c2;
 	removedPieces.push(pieces[r2][c2]);
-	setPiece(r2, c2, pieces[r1][c1]);
+	pieces[r2][c2] = pieces[r1][c1];
 	pieces[r2][c2]->setPos(r2, c2);
-	setPiece(r1, c1, shared_ptr<ChessPiece>());
+	pieces[r1][c1] = shared_ptr<ChessPiece>();
 	if (move.castle) {
 		int r3 = move.r3, c3 = move.c3, r4 = move.r4, c4 = move.c4;
 		removedPieces.push(pieces[r4][c4]);
-		setPiece(r4, c4, pieces[r3][c3]);
+		pieces[r4][c4] = pieces[r3][c3];
 		pieces[r4][c4]->setPos(r4, c4);
-		setPiece(r3, c3, shared_ptr<ChessPiece>());
+		pieces[r3][c3] = shared_ptr<ChessPiece>();
 	} else if (move.promotion != Move::NONE) {
 		removedPieces.push(pieces[r2][c2]);
 		pieces[r2][c2] = ChessPiece::fromPromotion(move.promotion, shared_from_this(),
 			r2, c2, removedPieces.top()->getColor());
 	} else if (move.enPassant) {
 		removedPieces.push(pieces[r1][c2]);
-		setPiece(r1, c2, shared_ptr<ChessPiece>());
+		pieces[r1][c2] = shared_ptr<ChessPiece>();
 	}
 	allMoves.push(move);
 	moveCnt++;

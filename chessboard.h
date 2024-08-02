@@ -24,13 +24,13 @@ protected:
 	vector<shared_ptr<Player>> players;
 	vector<vector<unique_ptr<ChessCell>>> cells;
 	vector<vector<shared_ptr<ChessPiece>>> pieces;
-	vector<vector<bool>> updated; // Cells that have been updated since last display
+	// Pieces in the previous display of the board
+	vector<vector<shared_ptr<ChessPiece>>> lastDisplayPieces;
 
 	// Store moves and removed pieces in a stack for undoing
 	stack<Move> allMoves;
 	stack<shared_ptr<ChessPiece>> removedPieces;
 
-	void setPiece(int row, int col, shared_ptr<ChessPiece> piece);
 	virtual void updateState() = 0;
 	
 public:
